@@ -1192,11 +1192,12 @@ let dashMonth = { year: now0.getFullYear(), month: now0.getMonth() }; // 0-based
    PERSISTENCE
    ========================================================== */
 function migrateLegacyData(arr){
-  // Convert old Indonesian field values to English
+  // Convert old Indonesian field values to English + normalize trialDate to YYYY-MM-DD
   return arr.map(ps => {
     const p = {...ps};
-    if(LEGACY_STATUS_MAP[p.status])   p.status   = LEGACY_STATUS_MAP[p.status];
+    if(LEGACY_STATUS_MAP[p.status])    p.status   = LEGACY_STATUS_MAP[p.status];
     if(LEGACY_FOLLOWUP_MAP[p.followUp]) p.followUp = LEGACY_FOLLOWUP_MAP[p.followUp];
+    if(p.trialDate) p.trialDate = normalizeDateStr(p.trialDate);
     return p;
   });
 }
@@ -1243,9 +1244,21 @@ function dateStrToDate(s){
     const epoch=new Date(1899,11,30); epoch.setDate(epoch.getDate()+parseInt(s));
     return epoch;
   }
-  // Fallback: let JS try (handles "Jun 15 2025", "2025/06/15", etc.)
+  // Full Date string e.g. "Tue Jun 02 2026 00:00:00 GMT+0700..."
+  // Let JS parse it, then normalize to midnight local
   const fallback=new Date(s);
-  return isNaN(fallback)?new Date('invalid'):fallback;
+  if(!isNaN(fallback)){
+    return new Date(fallback.getFullYear(), fallback.getMonth(), fallback.getDate());
+  }
+  return new Date('invalid');
+}
+
+// Convert any trialDate format → "YYYY-MM-DD" for consistent storage
+function normalizeDateStr(s){
+  if(!s) return '';
+  const d = dateStrToDate(s);
+  if(isNaN(d)) return s;
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 function getToday(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
 function isSameDate(a,b){
@@ -1344,6 +1357,7 @@ function getFormData(prefix){
     const el=document.getElementById(`${prefix}-${f.key}`);
     data[f.key]=el?el.value.trim():'';
   }));
+  if(data.trialDate) data.trialDate = normalizeDateStr(data.trialDate);
   return data;
 }
 
