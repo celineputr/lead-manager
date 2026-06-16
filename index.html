@@ -788,6 +788,53 @@ tr.row-highlight td{
 
       <!-- ===== TAB: EXPORT & SYNC ===== -->
       <section id="tab-importexport" class="tab-panel">
+
+        <!-- Google Sheets Sync Card -->
+        <div class="card" style="margin-bottom:16px;border-left:4px solid var(--success);">
+          <h3 style="font-size:15px;font-weight:800;margin-bottom:4px;">🔄 Google Sheets Sync</h3>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px;">
+            Sambungkan ke Google Sheets agar data bisa diakses dari perangkat manapun.
+          </p>
+
+          <!-- URL Input -->
+          <div style="margin-bottom:12px;">
+            <label for="syncUrlInput" style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:5px;display:block;">Apps Script URL</label>
+            <div class="sync-row">
+              <input type="text" id="syncUrlInput"
+                placeholder="https://script.google.com/macros/s/.../exec"
+                value="https://script.google.com/macros/s/AKfycbyTh9L7RPOfBobrFTXEdnVdHMpIVAM5sbfxDMIV7TskEpy8_feo7UBE4emAE5D4RxY/exec"
+                oninput="settings.sheetSyncUrl=this.value.trim();saveSettings();"
+              >
+              <button class="btn btn-secondary" onclick="pingSheets()">🔌 Test</button>
+            </div>
+          </div>
+
+          <!-- Auto sync toggle -->
+          <label class="sync-checkbox-label" style="margin-bottom:14px;">
+            <input type="checkbox" id="autoSyncCheck"
+              onchange="settings.autoSync=this.checked;saveSettings();showToast(this.checked?'Auto-sync aktif':'Auto-sync dimatikan');">
+            Auto-sync setiap kali data berubah (tambah / edit / hapus)
+          </label>
+
+          <!-- Action buttons -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button class="btn btn-primary" onclick="pushToSheets(false)">⬆️ Push ke Sheets</button>
+            <button class="btn btn-secondary" onclick="pullFromSheets()">⬇️ Pull dari Sheets</button>
+          </div>
+
+          <!-- Status + last sync -->
+          <div id="syncStatus" class="sync-status idle" style="margin-top:10px;"></div>
+          <div id="lastSyncLabel" style="font-size:12px;color:var(--ink-soft);margin-top:4px;"></div>
+
+          <!-- Help text -->
+          <div style="margin-top:14px;padding:10px 14px;background:var(--info-bg);border:1px solid #BFDBFE;border-radius:var(--radius-sm);font-size:12px;color:#1e40af;line-height:1.6;">
+            <strong>📌 Cara pakai:</strong><br>
+            • <strong>Push ke Sheets</strong> → kirim semua data dari website ke Google Sheets<br>
+            • <strong>Pull dari Sheets</strong> → ambil data dari Google Sheets ke website (timpa data lokal)<br>
+            • Aktifkan <strong>Auto-sync</strong> agar data otomatis ke-push setiap ada perubahan
+          </div>
+        </div>
+
         <!-- Import Card -->
         <div class="card" style="margin-bottom:16px;">
           <h3 style="font-size:15px;font-weight:800;margin-bottom:6px;">📥 Import Data</h3>
@@ -1139,7 +1186,8 @@ function loadSettings(){
   let s;
   try{ s = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; }
   catch(e){ s = {}; }
-  return Object.assign({ target:20, sheetSyncUrl:'', autoSync:false, lastSync:null }, s);
+  const defaults = { target:20, sheetSyncUrl:'https://script.google.com/macros/s/AKfycbyTh9L7RPOfBobrFTXEdnVdHMpIVAM5sbfxDMIV7TskEpy8_feo7UBE4emAE5D4RxY/exec', autoSync:false, lastSync:null };
+  return Object.assign(defaults, s);
 }
 function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(psData)); }
 function saveSettings(){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
@@ -1325,6 +1373,7 @@ function renderAll(){
   if(isTabActive('importexport')){
     renderWaTemplatesSettings();
     updateExportReminderUI();
+    updateSyncUI();
   }
 }
 
@@ -2126,7 +2175,109 @@ function cancelImport(){
 }
 
 function syncIfEnabled(){
-  // Sync removed — no-op kept so existing call sites don't break
+  if(settings.sheetSyncUrl && settings.autoSync){
+    pushToSheets(true);
+  }
+}
+
+/* ==========================================================
+   GOOGLE SHEETS SYNC
+   ========================================================== */
+function getSyncUrl(){ return (settings.sheetSyncUrl||'').trim(); }
+
+function setSyncStatus(msg, kind){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  el.textContent = msg;
+  el.className = 'sync-status ' + (kind||'idle');
+}
+
+function updateSyncUI(){
+  const url = getSyncUrl();
+  const inp = document.getElementById('syncUrlInput');
+  const autoChk = document.getElementById('autoSyncCheck');
+  const lastEl = document.getElementById('lastSyncLabel');
+  if(inp) inp.value = url;
+  if(autoChk) autoChk.checked = !!settings.autoSync;
+  if(lastEl){
+    if(settings.lastSync){
+      const d = new Date(settings.lastSync);
+      lastEl.textContent = 'Last sync: ' + d.getDate() + ' ' + MONTHS_SHORT_EN[d.getMonth()] + ' ' + d.getFullYear()
+        + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+    } else {
+      lastEl.textContent = 'Last sync: never';
+    }
+  }
+}
+
+async function pingSheets(){
+  const url = getSyncUrl();
+  if(!url){ setSyncStatus('Paste URL Apps Script kamu dulu.','error'); return; }
+  setSyncStatus('Menguji koneksi...','idle');
+  try{
+    const res = await fetch(url + '?action=ping');
+    const json = await res.json();
+    if(json.ok){ setSyncStatus('Terhubung! Google Sheets bisa diakses.','success'); }
+    else { setSyncStatus('Error: ' + json.message,'error'); }
+  }catch(e){
+    setSyncStatus('Tidak bisa menjangkau script. Cek URL atau re-deploy.','error');
+  }
+}
+
+async function pushToSheets(silent){
+  const url = getSyncUrl();
+  if(!url){
+    if(!silent) setSyncStatus('Paste URL Apps Script kamu dulu.','error');
+    return;
+  }
+  if(!silent) setSyncStatus('Menyimpan ke Google Sheets...','idle');
+  try{
+    const res = await fetch(url, {
+      method:'POST',
+      body: JSON.stringify({ action:'write', data: psData }),
+    });
+    const json = await res.json();
+    if(json.ok){
+      settings.lastSync = Date.now();
+      saveSettings();
+      updateSyncUI();
+      if(!silent){ setSyncStatus(json.message,'success'); showToast('Data tersimpan ke Google Sheets!'); }
+    } else {
+      if(!silent) setSyncStatus('Error: ' + json.message,'error');
+    }
+  }catch(e){
+    if(!silent) setSyncStatus('Gagal: ' + e.message,'error');
+  }
+}
+
+async function pullFromSheets(){
+  const url = getSyncUrl();
+  if(!url){ setSyncStatus('Paste URL Apps Script kamu dulu.','error'); return; }
+  if(!confirm('Tarik data dari Google Sheets?\n\nIni akan MENGGANTI semua data lokal dengan data dari Sheets. Data lokal yang belum di-push akan hilang.')) return;
+  setSyncStatus('Memuat dari Google Sheets...','idle');
+  try{
+    const res = await fetch(url + '?action=read');
+    const json = await res.json();
+    if(!json.ok){ setSyncStatus('Error: ' + json.message,'error'); return; }
+    const raw = json.data || [];
+    if(!raw.length){
+      setSyncStatus('Sheets kosong — tidak ada data yang ditarik.','idle');
+      return;
+    }
+    psData = migrateLegacyData(raw.map(r => {
+      if(!r.id) r.id = generateId();
+      return r;
+    }));
+    saveData();
+    settings.lastSync = Date.now();
+    saveSettings();
+    updateSyncUI();
+    setSyncStatus(psData.length + ' data berhasil dimuat dari Google Sheets.','success');
+    showToast('Data dimuat dari Google Sheets!');
+    renderAll();
+  }catch(e){
+    setSyncStatus('Gagal: ' + e.message,'error');
+  }
 }
 
 /* ==========================================================
@@ -2800,6 +2951,12 @@ function init(){
 
   // Export reminder
   updateExportReminderUI();
+
+  // Sheets sync UI
+  updateSyncUI();
+  // Pre-fill URL if already saved in settings
+  const syncInp = document.getElementById('syncUrlInput');
+  if(syncInp && settings.sheetSyncUrl) syncInp.value = settings.sheetSyncUrl;
 
   // Keyboard shortcuts
   document.addEventListener('keydown', e => {
