@@ -951,7 +951,7 @@ tr.row-highlight td{
         <div class="notes-grid" id="notesGrid"></div>
 
         <!-- Empty state -->
-        <div class="notes-empty" id="notesEmpty" hidden>
+        <div class="notes-empty" id="notesEmpty">
           <div style="font-size:36px;margin-bottom:10px;">📝</div>
           <div style="font-weight:700;font-size:15px;margin-bottom:6px;">No notes yet</div>
           <div style="color:var(--ink-soft);font-size:13px;">Click "＋ Add Note" to create your first sticky note.</div>
@@ -2423,8 +2423,8 @@ function addNote(){
   renderNotes();
   // Auto-focus the new note's label
   requestAnimationFrame(()=>{
-    const el = document.querySelector(`.note-card[data-note-id="${note.id}"] .note-label`);
-    if(el){ el.focus(); }
+    const cards = document.querySelectorAll('.note-card');
+    if(cards.length){ const inp = cards[0].querySelector('.note-label'); if(inp) inp.focus(); }
   });
 }
 
@@ -2443,8 +2443,8 @@ function toggleWide(id){
   renderNotes();
   // Re-focus body if was editing
   requestAnimationFrame(()=>{
-    const el = document.querySelector(`.note-card[data-note-id="${id}"] .note-body`);
-    if(el) el.focus();
+    const card = document.querySelector(`.note-card[data-note-id]`);
+    if(card){ const ta = card.querySelector('.note-body'); if(ta) ta.focus(); }
   });
 }
 
@@ -2481,40 +2481,71 @@ function renderNotes(){
 
   if(notesData.length === 0){
     grid.innerHTML = '';
-    if(empty) empty.hidden = false;
+    if(empty) empty.style.display = 'block';
     return;
   }
-  if(empty) empty.hidden = true;
+  if(empty) empty.style.display = 'none';
 
-  grid.innerHTML = notesData.map(note => {
-    const id = escapeHTML(note.id);
-    const wideClass = note.wide ? ' wide' : '';
-    return `<div class="note-card${wideClass}" data-note-id="${id}">
-      <div class="note-pin"></div>
-      <input
-        class="note-label"
-        type="text"
-        maxlength="40"
-        placeholder="Label..."
-        value="${escapeHTML(note.label||'')}"
-        oninput="onNoteInput('${id}','label',this.value)"
-      >
-      <textarea
-        class="note-body"
-        placeholder="Write anything here..."
-        oninput="onNoteInput('${id}','body',this.value)"
-      >${escapeHTML(note.body||'')}</textarea>
-      <div class="note-footer">
-        <span class="note-date">${noteDateLabel(note.updatedAt||note.createdAt)}</span>
-        <div class="note-controls">
-          <button class="note-wide-btn" onclick="toggleWide('${id}')">${note.wide ? '↔ Narrow' : '↔ Wide'}</button>
-          <button class="note-del-btn" onclick="deleteNote('${id}')">🗑</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  // Build each card using DOM (avoids nested template literal quoting issues)
+  grid.innerHTML = '';
+  notesData.forEach(function(note){
+    const safeId = note.id;
+    const div = document.createElement('div');
+    div.className = 'note-card' + (note.wide ? ' wide' : '');
+    div.dataset.noteId = safeId;
 
-  // Apply current search filter without re-rendering
+    // Pin
+    const pin = document.createElement('div');
+    pin.className = 'note-pin';
+    div.appendChild(pin);
+
+    // Label input
+    const labelInput = document.createElement('input');
+    labelInput.className = 'note-label';
+    labelInput.type = 'text';
+    labelInput.maxLength = 40;
+    labelInput.placeholder = 'Label...';
+    labelInput.value = note.label || '';
+    labelInput.addEventListener('input', function(){ onNoteInput(safeId, 'label', this.value); });
+    div.appendChild(labelInput);
+
+    // Body textarea
+    const textarea = document.createElement('textarea');
+    textarea.className = 'note-body';
+    textarea.placeholder = 'Tulis apapun di sini...';
+    textarea.value = note.body || '';
+    textarea.addEventListener('input', function(){ onNoteInput(safeId, 'body', this.value); });
+    div.appendChild(textarea);
+
+    // Footer
+    const footer = document.createElement('div');
+    footer.className = 'note-footer';
+
+    const dateSpan = document.createElement('span');
+    dateSpan.className = 'note-date';
+    dateSpan.textContent = noteDateLabel(note.updatedAt || note.createdAt);
+    footer.appendChild(dateSpan);
+
+    const controls = document.createElement('div');
+    controls.className = 'note-controls';
+
+    const wideBtn = document.createElement('button');
+    wideBtn.className = 'note-wide-btn';
+    wideBtn.textContent = note.wide ? '↔ Narrow' : '↔ Wide';
+    wideBtn.addEventListener('click', function(){ toggleWide(safeId); });
+    controls.appendChild(wideBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'note-del-btn';
+    delBtn.textContent = '🗑';
+    delBtn.addEventListener('click', function(){ deleteNote(safeId); });
+    controls.appendChild(delBtn);
+
+    footer.appendChild(controls);
+    div.appendChild(footer);
+    grid.appendChild(div);
+  });
+
   filterNotes();
 }
 
