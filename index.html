@@ -3050,9 +3050,6 @@ function init(){
   // WA Templates
   loadWaTemplates();
   renderWaTemplatesSettings();
-  document.getElementById('waModalClose').addEventListener('click', closeWaModal);
-  document.getElementById('waModalCloseBtn').addEventListener('click', closeWaModal);
-  document.getElementById('waModal').addEventListener('click', e=>{ if(e.target===document.getElementById('waModal')) closeWaModal(); });
 
   // Startup reminder modal
   document.getElementById('startupModalClose').addEventListener('click', closeStartupModal);
