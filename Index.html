@@ -1,0 +1,3049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Manager Celine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F8F8F7;
+  --card:#FFFFFF;
+  --ink:#2D2D2A;
+  --ink-soft:#7A7A74;
+  --border:#E6E4DD;
+  --danger:#DC2626;
+  --danger-bg:#FEF2F2;
+  --warning:#D97706;
+  --warning-bg:#FFFBEB;
+  --success:#16A34A;
+  --success-bg:#F0FDF4;
+  --info:#2563EB;
+  --info-bg:#EFF6FF;
+  --gray:#6B7280;
+  --gray-bg:#F3F4F6;
+  --purple:#7C3AED;
+  --purple-bg:#F5F3FF;
+  --radius:10px;
+  --radius-sm:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;}
+
+/* ---------- Layout ---------- */
+.app{display:flex;min-height:100vh;}
+
+.sidebar{
+  width:224px;flex-shrink:0;background:var(--card);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  padding:18px 14px;position:sticky;top:0;height:100vh;
+}
+.sidebar-logo{display:flex;align-items:center;gap:12px;padding:6px 8px 22px;}
+.logo-icon{
+  width:42px;height:42px;flex-shrink:0;background:var(--ink);color:#fff;
+  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.logo-text{min-width:0;}
+.logo-title{font-weight:800;font-size:15px;line-height:1.2;}
+
+.sidebar-nav{display:flex;flex-direction:column;gap:4px;}
+.nav-item{
+  position:relative;display:flex;align-items:center;gap:12px;
+  padding:11px 12px;border:none;background:none;border-radius:8px;
+  font-size:14px;font-weight:600;color:var(--ink-soft);
+  cursor:pointer;text-align:left;width:100%;transition:background .15s, color .15s;
+}
+.nav-item:hover{background:#F2F1ED;color:var(--ink);}
+.nav-item.active{background:var(--ink);color:#fff;}
+.nav-icon{font-size:17px;width:20px;text-align:center;flex-shrink:0;}
+.nav-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nav-badge{
+  background:var(--danger);color:#fff;font-size:11px;font-weight:700;
+  border-radius:999px;padding:1px 7px;min-width:18px;text-align:center;line-height:1.5;
+}
+.nav-item.active .nav-badge{background:#fff;color:var(--danger);}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;}
+.topbar{
+  position:sticky;top:0;z-index:10;background:var(--card);
+  border-bottom:1px solid var(--border);padding:18px 28px;
+  display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.topbar h1{font-size:19px;font-weight:800;}
+.topbar p{font-size:13px;color:var(--ink-soft);margin-top:2px;}
+.topbar-date{font-size:13px;font-weight:600;color:var(--ink-soft);white-space:nowrap;}
+
+.content{flex:1;overflow-y:auto;padding:24px 28px;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.section-title{font-size:15px;font-weight:800;margin:28px 0 12px;}
+.tab-panel > .section-title:first-child{margin-top:0;}
+
+/* ---------- Target Banner ---------- */
+.target-banner{border-left:4px solid var(--success);}
+.target-banner.status-warning{border-left-color:var(--warning);}
+.target-banner.status-danger{border-left-color:var(--danger);}
+.target-banner.status-done{border-left-color:var(--success);background:var(--success-bg);}
+.target-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px;}
+.target-title{font-size:15px;font-weight:800;}
+.target-message{font-size:13px;color:var(--ink-soft);margin-top:4px;}
+.target-edit{display:flex;align-items:center;gap:8px;}
+.target-edit label{margin:0;font-size:12px;color:var(--ink-soft);font-weight:600;}
+.target-edit input{width:80px;padding:7px 10px;}
+.progress-bar-track{height:10px;border-radius:999px;background:#EFEEE9;overflow:hidden;}
+.progress-bar-fill{height:100%;border-radius:999px;background:var(--success);transition:width .3s ease;}
+.progress-bar-fill.warning{background:var(--warning);}
+.progress-bar-fill.danger{background:var(--danger);}
+.target-stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--ink-soft);}
+.target-stats strong{display:block;font-size:18px;color:var(--ink);font-weight:800;}
+
+/* ---------- Reminders ---------- */
+.reminder-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;}
+.reminder-card{
+  border-left:4px solid var(--ink);border-radius:var(--radius-sm);
+  padding:14px 16px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.reminder-card.urgent{border-left-color:var(--danger);background:var(--danger-bg);}
+.reminder-card.warning{border-left-color:var(--warning);background:var(--warning-bg);}
+.reminder-card.info{border-left-color:var(--info);background:var(--info-bg);}
+.reminder-tag{
+  display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
+  padding:3px 9px;border-radius:5px;margin-bottom:8px;color:#fff;
+}
+.tag-urgent{background:var(--danger);}
+.tag-warning{background:var(--warning);}
+.tag-info{background:var(--info);}
+.reminder-name{font-weight:700;font-size:14px;margin-bottom:2px;}
+.reminder-username{color:var(--ink-soft);font-weight:500;font-size:13px;}
+.reminder-phone{font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
+.reminder-message{font-size:13px;margin-bottom:10px;}
+.reminder-empty{
+  background:var(--success-bg);border:1px solid #BBF0CE;color:#14532D;
+  border-radius:var(--radius);padding:18px;text-align:center;font-weight:700;
+  font-size:14px;grid-column:1/-1;
+}
+
+/* ---------- Stats ---------- */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
+.stat-value{font-size:24px;font-weight:800;}
+.stat-label{font-size:12px;color:var(--ink-soft);margin-top:2px;font-weight:600;}
+.stat-danger{color:var(--danger);}
+.stat-success{color:var(--success);}
+.stat-gray{color:var(--gray);}
+.stat-orange{color:var(--warning);}
+.stat-info{color:var(--info);}
+.stat-purple{color:var(--purple);}
+
+/* ---------- Unreserved List ---------- */
+.unreserved-table{width:100%;border-collapse:collapse;font-size:13px;}
+.unreserved-table th{
+  text-align:left;padding:10px 14px;background:#FAFAF8;
+  border-bottom:2px solid var(--border);font-size:11px;
+  text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);white-space:nowrap;
+}
+.unreserved-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.unreserved-table tbody tr:last-child td{border-bottom:none;}
+.unreserved-table tbody tr:hover{background:#FAFAF8;}
+.unreserved-empty{
+  background:var(--success-bg);border:1px solid #BBF0CE;color:#14532D;
+  border-radius:var(--radius);padding:18px;text-align:center;font-weight:700;font-size:14px;
+}
+
+/* ---------- Badges ---------- */
+.badge{display:inline-block;padding:3px 11px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;}
+.badge-red{background:var(--danger-bg);color:var(--danger);}
+.badge-blue{background:var(--info-bg);color:var(--info);}
+.badge-green{background:var(--success-bg);color:var(--success);}
+.badge-orange{background:var(--warning-bg);color:var(--warning);}
+.badge-gray{background:var(--gray-bg);color:#4B5563;}
+.badge-purple{background:var(--purple-bg);color:var(--purple);}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;
+  border:1px solid transparent;font-size:14px;font-weight:700;cursor:pointer;
+  font-family:inherit;text-decoration:none;transition:background .15s, transform .05s, opacity .15s;
+  white-space:nowrap;
+}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--ink);color:#fff;}
+.btn-primary:hover{background:#1c1c19;}
+.btn-secondary{background:#fff;color:var(--ink);border-color:var(--border);}
+.btn-secondary:hover{background:#F2F1ED;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{opacity:.88;}
+.btn-wa{background:#16A34A;color:#fff;}
+.btn-wa:hover{opacity:.88;}
+.btn-sm{padding:6px 13px;font-size:12px;}
+.btn-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:7px;border:1px solid var(--border);
+  background:#fff;cursor:pointer;font-size:14px;text-decoration:none;color:var(--ink);
+}
+.btn-icon:hover{background:#F2F1ED;}
+
+/* ---------- Forms ---------- */
+label{display:block;font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:5px;}
+input,select,textarea{
+  font-family:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--border);
+  border-radius:8px;background:#fff;color:var(--ink);width:100%;
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--ink);outline-offset:1px;}
+textarea{resize:vertical;min-height:90px;}
+select:disabled{color:var(--ink-soft);background:#FAFAF8;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.form-section-full{grid-column:1/-1;}
+.form-section-title{font-size:14px;font-weight:800;margin-bottom:14px;}
+.form-section-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.form-row{display:flex;flex-direction:column;}
+.form-row-full{grid-column:1/-1;}
+.form-actions{display:flex;gap:10px;margin-top:18px;grid-column:1/-1;}
+
+/* ---------- Toolbar & Table ---------- */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.toolbar input[type="text"]{flex:1 1 220px;}
+.toolbar select{width:auto;flex:0 1 160px;}
+
+.table-scroll-outer{position:relative;}
+.table-scroll-btn{
+  position:absolute;top:50%;transform:translateY(-50%);
+  z-index:10;width:32px;height:56px;
+  border:1px solid var(--border);border-radius:8px;
+  background:var(--card);color:var(--ink);
+  cursor:pointer;font-size:16px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  transition:background .15s,opacity .15s;
+  opacity:.85;
+}
+.table-scroll-btn:hover{background:#EFEEE9;opacity:1;}
+.table-scroll-btn.scroll-left{left:-16px;}
+.table-scroll-btn.scroll-right{right:-16px;}
+.table-scroll-btn:disabled{opacity:.25;cursor:default;}
+.table-wrapper{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:1400px;}
+th{
+  text-align:left;padding:11px 14px;background:#FAFAF8;border-bottom:2px solid var(--border);
+  font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);white-space:nowrap;
+  user-select:none;
+}
+th.sortable{cursor:pointer;}
+th.sortable:hover{background:#EFEEE9;color:var(--ink);}
+th .sort-icon{margin-left:4px;opacity:.4;font-style:normal;}
+th.sort-asc .sort-icon,th.sort-desc .sort-icon{opacity:1;color:var(--ink);}
+td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tr.has-reminder{background:var(--danger-bg);}
+.action-cell{display:flex;gap:6px;}
+.trial-time{display:block;color:var(--ink-soft);font-size:11px;margin-top:2px;}
+.checkbox-cell{width:36px;text-align:center;}
+.checkbox-cell input{width:16px;height:16px;cursor:pointer;}
+tr.row-selected{background:var(--info-bg);}
+
+.empty-state{
+  text-align:center;padding:50px 20px;color:var(--ink-soft);font-weight:600;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+}
+
+/* ---------- Export / Sync ---------- */
+.io-card h3{font-size:15px;font-weight:800;margin-bottom:6px;}
+.io-card p{font-size:13px;color:var(--ink-soft);margin-bottom:14px;}
+.io-card .btn{margin-top:8px;margin-right:8px;}
+.column-ref{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.column-ref span{
+  background:var(--gray-bg);padding:3px 10px;border-radius:6px;font-size:12px;
+  font-family:'SFMono-Regular',Consolas,monospace;color:#374151;
+}
+.alias-note{font-size:12px;color:var(--ink-soft);margin-top:10px;}
+
+/* ---------- Sheet Sync ---------- */
+.sync-row{display:flex;gap:10px;margin-bottom:14px;}
+.sync-row input{flex:1;}
+.sync-checkbox-label{
+  display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;
+  color:var(--ink);cursor:pointer;margin-bottom:0;
+}
+.sync-checkbox-label input{width:16px;height:16px;flex-shrink:0;}
+.sync-status{margin-top:12px;font-size:13px;line-height:1.5;}
+.sync-status.success{color:var(--success);font-weight:600;}
+.sync-status.error{color:var(--danger);font-weight:600;}
+.sync-status.idle{color:var(--ink-soft);}
+
+/* ---------- Modal ---------- */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;}
+.modal-overlay.visible{display:flex;}
+.modal{background:#fff;border-radius:12px;max-width:760px;width:100%;max-height:90vh;overflow-y:auto;}
+.modal-sm{max-width:480px;}
+.modal-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:18px 22px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:1;
+}
+.modal-header h2{font-size:16px;font-weight:800;}
+.modal-body{padding:22px;}
+.modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--ink-soft);line-height:1;}
+.modal-close:hover{color:var(--ink);}
+.modal-footer{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+.warning-box{
+  background:var(--warning-bg);border:1px solid #FCE2A8;color:#92400E;
+  border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;margin-bottom:16px;line-height:1.5;
+}
+.reschedule-name{font-weight:800;font-size:15px;margin-bottom:14px;}
+
+/* ---------- Toast ---------- */
+.toast-container{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:300;}
+.toast{
+  background:var(--ink);color:#fff;padding:12px 18px;border-radius:8px;font-size:14px;font-weight:600;
+  box-shadow:0 6px 16px rgba(0,0,0,.18);opacity:0;transform:translateY(12px);
+  transition:opacity .25s, transform .25s;max-width:320px;
+}
+.toast.show{opacity:1;transform:translateY(0);}
+
+/* ---------- Responsive ---------- */
+@media (max-width:900px){
+  .sidebar{width:64px;padding:16px 8px;}
+  .sidebar-logo{justify-content:center;padding:4px 0 18px;}
+  .logo-text{display:none;}
+  .nav-item{justify-content:center;padding:11px 0;}
+  .nav-label{display:none;}
+  .nav-badge{position:absolute;top:2px;right:6px;font-size:9px;padding:0 4px;min-width:14px;line-height:1.4;}
+  .content{padding:16px;}
+  .topbar{padding:14px 16px;}
+  .form-grid,.charts-row{grid-template-columns:1fr;}
+  .sync-row{flex-direction:column;}
+  .form-section-grid{grid-template-columns:1fr;}
+  .target-edit{width:100%;}
+}
+
+/* ---------- Month Picker ---------- */
+.month-picker-bar{
+  display:flex;align-items:center;gap:10px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px 18px;margin-bottom:18px;
+}
+.month-picker-label{
+  font-size:17px;font-weight:800;color:var(--ink);flex:1;text-align:center;
+}
+
+/* ---------- Import ---------- */
+.import-dropzone{
+  border:2px dashed var(--border);border-radius:var(--radius);
+  padding:36px 20px;text-align:center;background:#FAFAF8;
+  transition:border-color .2s,background .2s;cursor:default;
+}
+.import-dropzone.drag-over{border-color:var(--ink);background:var(--info-bg);}
+.import-drop-icon{font-size:36px;margin-bottom:8px;}
+.import-drop-label{font-size:14px;font-weight:600;color:var(--ink-soft);}
+.import-drop-hint{font-size:12px;color:var(--ink-soft);margin-top:8px;}
+.import-preview-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0 4px;flex-wrap:wrap;gap:8px;
+}
+.import-preview-header span{font-size:13px;font-weight:700;color:var(--ink);}
+tr.import-skip td{opacity:.45;background:#fafafa;}
+tr.import-skip td:first-child::after{content:' (skip)';font-size:11px;color:var(--gray);}
+
+/* ---------- Reminder Checklist ---------- */
+.reminder-card{position:relative;transition:opacity .25s,transform .25s;}
+.reminder-card.done-check{opacity:.45;}
+.reminder-card.done-check .reminder-name,
+.reminder-card.done-check .reminder-message{text-decoration:line-through;color:var(--ink-soft);}
+.reminder-check-btn{
+  position:absolute;top:12px;right:12px;
+  width:26px;height:26px;border-radius:50%;
+  border:2px solid currentColor;background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:900;line-height:1;
+  transition:background .15s,color .15s;
+  color:inherit;
+}
+.reminder-check-btn:hover{background:rgba(0,0,0,.08);}
+.reminder-card.done-check .reminder-check-btn{
+  background:var(--success);border-color:var(--success);color:#fff;
+}
+.reminder-done-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:#F0FDF4;border:1px solid #BBF0CE;
+  border-radius:var(--radius);margin-top:10px;font-size:13px;
+  color:#166534;font-weight:600;
+}
+.reminder-show-done{
+  background:none;border:none;color:#166534;font-size:12px;
+  cursor:pointer;text-decoration:underline;padding:0;
+}
+
+/* ---------- Date filter ---------- */
+.date-filter-wrap{display:flex;flex-direction:column;gap:4px;}
+.date-filter-label{font-size:11px;font-weight:700;color:var(--ink-soft);margin:0;white-space:nowrap;}
+.date-filter-row{display:flex;align-items:center;gap:6px;}
+.date-filter-row input[type="date"]{
+  width:140px;flex:none;padding:7px 10px;font-size:13px;
+  border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--ink);
+}
+.date-filter-sep{color:var(--ink-soft);font-size:13px;}
+
+/* ---------- Reminder card actions ---------- */
+.reminder-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center;}
+.btn-goto{
+  background:var(--card);border:1px solid var(--border);color:var(--ink);
+  padding:5px 11px;border-radius:7px;font-size:12px;font-weight:700;
+  cursor:pointer;text-decoration:none;white-space:nowrap;
+  transition:background .15s;
+}
+.btn-goto:hover{background:#EFEEE9;}
+.btn-edit-inline{
+  background:var(--ink);color:#fff;border:none;
+  padding:5px 11px;border-radius:7px;font-size:12px;font-weight:700;
+  cursor:pointer;white-space:nowrap;
+  transition:opacity .15s;
+}
+.btn-edit-inline:hover{opacity:.82;}
+tr.row-highlight td{
+  animation: highlightFade 2.5s ease forwards;
+}
+@keyframes highlightFade{
+  0%{background:#FEF3C7;}
+  70%{background:#FEF3C7;}
+  100%{background:transparent;}
+}
+
+/* ========================================
+   NOTES TAB
+   ======================================== */
+.notes-toolbar{
+  display:flex;align-items:center;gap:10px;margin-bottom:20px;
+}
+.notes-toolbar input{
+  flex:1;max-width:320px;
+}
+
+/* Grid: 4 small (1fr each) + wide cards span 2 */
+.notes-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  align-items:start;
+}
+
+/* Base card */
+.note-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:14px;
+  display:flex;flex-direction:column;gap:0;
+  position:relative;
+  transition:box-shadow .15s;
+  min-height:160px;
+}
+.note-card:hover{box-shadow:0 2px 12px rgba(0,0,0,.07);}
+.note-card.wide{grid-column:span 2;}
+
+/* Pin dot */
+.note-pin{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--border);
+  margin:0 auto 10px;
+  flex-shrink:0;
+}
+
+/* Label (editable) */
+.note-label{
+  font-size:10px;font-weight:800;letter-spacing:.08em;
+  color:var(--ink-soft);text-transform:uppercase;
+  margin-bottom:7px;
+  border:none;background:transparent;width:100%;
+  outline:none;cursor:text;padding:0;
+  font-family:inherit;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.note-label:focus{
+  color:var(--ink);border-bottom:1px dashed var(--border);
+  white-space:normal;overflow:visible;
+}
+.note-label::placeholder{color:var(--border);}
+
+/* Body (editable) */
+.note-body{
+  flex:1;font-size:13px;color:var(--ink);line-height:1.6;
+  border:none;background:transparent;resize:none;
+  width:100%;outline:none;cursor:text;
+  font-family:inherit;padding:0;
+  min-height:80px;
+}
+.note-body::placeholder{color:var(--border);}
+
+/* Footer: date + controls */
+.note-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:10px;padding-top:8px;
+  border-top:1px solid var(--border);
+}
+.note-date{font-size:11px;color:var(--ink-soft);}
+.note-controls{display:flex;gap:4px;opacity:0;transition:opacity .15s;}
+.note-card:hover .note-controls{opacity:1;}
+
+/* Wide toggle button */
+.note-wide-btn{
+  background:none;border:1px solid var(--border);border-radius:6px;
+  color:var(--ink-soft);font-size:11px;padding:3px 8px;cursor:pointer;
+  white-space:nowrap;transition:background .12s;
+  font-family:inherit;
+}
+.note-wide-btn:hover{background:var(--bg);}
+.note-card.wide .note-wide-btn{font-weight:700;color:var(--ink);}
+
+/* Delete button */
+.note-del-btn{
+  background:none;border:1px solid var(--border);border-radius:6px;
+  color:var(--ink-soft);font-size:11px;padding:3px 8px;cursor:pointer;
+  transition:background .12s,color .12s,border-color .12s;
+  font-family:inherit;
+}
+.note-del-btn:hover{background:var(--danger-bg);color:var(--danger);border-color:var(--danger);}
+
+/* Empty state */
+.notes-empty{
+  text-align:center;padding:60px 20px;color:var(--ink-soft);
+}
+
+/* Search highlight */
+.note-card.hidden-note{display:none;}
+
+/* ---------- WA Template ---------- */
+.wa-template-block{margin-bottom:14px;}
+.wa-template-label{
+  font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-soft);margin-bottom:5px;
+}
+.wa-template-textarea{
+  width:100%;min-height:80px;resize:vertical;
+  border:1px solid var(--border);border-radius:8px;
+  padding:9px 12px;font-size:13px;font-family:inherit;
+  background:#fff;color:var(--ink);outline:none;line-height:1.5;
+}
+.wa-template-textarea:focus{border-color:var(--ink);}
+
+/* WA Modal copy list */
+.wa-copy-list{display:flex;flex-direction:column;gap:10px;}
+.wa-copy-item{
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px 14px;
+}
+.wa-copy-item-label{
+  font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-soft);margin-bottom:6px;
+}
+.wa-copy-item-text{
+  font-size:13px;color:var(--ink);line-height:1.6;white-space:pre-wrap;
+  margin-bottom:10px;
+}
+.wa-copy-btn{
+  background:var(--ink);color:#fff;border:none;border-radius:7px;
+  padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:inherit;transition:opacity .15s;
+}
+.wa-copy-btn:hover{opacity:.82;}
+.wa-copy-btn.copied{background:var(--success);}
+
+/* Startup modal items */
+.startup-reminder-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 0;border-bottom:1px solid var(--border);
+}
+.startup-reminder-item:last-child{border-bottom:none;}
+.startup-tag{
+  font-size:11px;font-weight:800;padding:3px 8px;border-radius:5px;
+  white-space:nowrap;flex-shrink:0;
+}
+.startup-tag.urgent{background:var(--danger-bg);color:var(--danger);}
+.startup-tag.warning{background:var(--warning-bg);color:var(--warning);}
+.startup-tag.info{background:var(--info-bg);color:var(--info);}
+.startup-name{font-size:13px;font-weight:700;color:var(--ink);}
+.startup-msg{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+
+/* ---------- WA Dropdown ---------- */
+.wa-dropdown-menu{
+  position:fixed;
+  min-width:280px;max-width:360px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);box-shadow:0 8px 28px rgba(0,0,0,.16);
+  z-index:9999;padding:6px 0;
+  display:none;
+  animation:dropIn .12s ease;
+}
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
+@keyframes dropIn{
+  from{opacity:0;transform:translateY(-6px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.wa-dropdown-menu.open{display:block;}
+.wa-dropdown-header{
+  font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-soft);padding:6px 14px 4px;
+}
+.wa-dropdown-item{
+  padding:9px 14px;cursor:pointer;
+  border-bottom:1px solid var(--border);
+}
+.wa-dropdown-item:last-child{border-bottom:none;}
+.wa-dropdown-item:hover{background:var(--bg);}
+.wa-dropdown-item-label{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px;}
+.wa-dropdown-item-preview{
+  font-size:11px;color:var(--ink-soft);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;
+}
+.wa-dropdown-item-copy{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.wa-copy-pill{
+  font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;
+  background:var(--ink);color:#fff;white-space:nowrap;flex-shrink:0;
+  transition:background .15s;
+}
+.wa-copy-pill.copied{background:var(--success);}
+.wa-dropdown-empty{
+  padding:10px 14px;font-size:12px;color:var(--ink-soft);text-align:center;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🎯</div>
+      <div class="logo-text">
+        <div class="logo-title">Lead Manager Celine</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-tab="dashboard">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Dashboard</span>
+        <span class="nav-badge" id="reminderBadge" hidden>0</span>
+      </button>
+      <button class="nav-item" data-tab="tambah">
+        <span class="nav-icon">➕</span>
+        <span class="nav-label">Add PS</span>
+      </button>
+      <button class="nav-item" data-tab="data">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">PS Data</span>
+      </button>
+      <button class="nav-item" data-tab="notes">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label">Notes</span>
+      </button>
+      <button class="nav-item" data-tab="importexport">
+        <span class="nav-icon">📂</span>
+        <span class="nav-label">Import &amp; Export</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <p id="pageSubtitle">Performance summary &amp; today's reminders</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="syncLoadingBanner" hidden style="font-size:12px;font-weight:600;color:var(--success);display:flex;align-items:center;gap:6px;white-space:nowrap;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;border:2px solid var(--success);border-top-color:transparent;animation:spin .7s linear infinite;"></span>
+          Syncing...
+        </div>
+        <div class="topbar-date" id="topbarDate"></div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- ===== TAB: DASHBOARD ===== -->
+      <section id="tab-dashboard" class="tab-panel active">
+
+        <!-- Month Picker -->
+        <div class="month-picker-bar">
+          <button class="btn btn-secondary btn-sm" id="prevMonthBtn">&#8249; Prev</button>
+          <div class="month-picker-label" id="monthPickerLabel"></div>
+          <button class="btn btn-secondary btn-sm" id="nextMonthBtn">Next &#8250;</button>
+          <button class="btn btn-secondary btn-sm" id="todayMonthBtn" style="margin-left:8px;">Today</button>
+        </div>
+
+        <div class="card target-banner" id="targetBanner">
+          <div class="target-header">
+            <div>
+              <div class="target-title">🎯 Monthly Target — Attended</div>
+              <div class="target-message" id="targetMessage"></div>
+            </div>
+            <div class="target-edit">
+              <div>
+                <label for="targetInput">Monthly Target</label>
+                <input type="number" id="targetInput" min="1" step="1">
+              </div>
+              <button class="btn btn-secondary btn-sm" id="saveTargetBtn" style="margin-top:18px;">Save</button>
+            </div>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progressFill" style="width:0%;"></div>
+          </div>
+          <div class="target-stats">
+            <div><strong id="targetAttended">0</strong>Attended</div>
+            <div><strong id="targetTarget">0</strong>Target</div>
+            <div><strong id="targetPct">0%</strong>Achieved</div>
+            <div><strong id="targetDaysLeft">0</strong>Days Left</div>
+            <div><strong id="targetNeeded">0</strong>Needed</div>
+          </div>
+        </div>
+
+        <h2 class="section-title">⚠️ Reminders &amp; To-Do</h2>
+        <div class="reminder-grid" id="reminderGrid"></div>
+
+        <h2 class="section-title">📈 Statistics</h2>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total PS</div></div>
+          <div class="stat-card"><div class="stat-value stat-danger" id="statBelumWar">0</div><div class="stat-label">Unreserved</div></div>
+          <div class="stat-card"><div class="stat-value stat-success" id="statAttended">0</div><div class="stat-label">Attended</div></div>
+          <div class="stat-card"><div class="stat-value stat-orange" id="statHalf">0</div><div class="stat-label">Half</div></div>
+          <div class="stat-card"><div class="stat-value stat-gray" id="statAbsent">0</div><div class="stat-label">Absent</div></div>
+          <div class="stat-card"><div class="stat-value stat-info" id="statAMC">0</div><div class="stat-label">AMC</div></div>
+          <div class="stat-card"><div class="stat-value stat-purple" id="statOKTB">0</div><div class="stat-label">OKTB</div></div>
+        </div>
+
+        <h2 class="section-title">📣 Not Followed Up</h2>
+        <div id="notFollowedUpList"></div>
+
+        <h2 class="section-title">🔔 Unreserved PS — Need Action</h2>
+        <div id="unreservedList"></div>
+
+      </section>
+
+      <!-- ===== TAB: ADD PS ===== -->
+      <section id="tab-tambah" class="tab-panel">
+        <div class="form-grid" id="addFormContainer"></div>
+        <div class="form-grid" style="margin-top:16px;">
+          <div class="form-actions" style="grid-column:1/-1;">
+            <button class="btn btn-primary" id="saveAddBtn">💾 Save PS Data</button>
+            <button class="btn btn-secondary" id="resetAddBtn">↺ Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TAB: PS DATA ===== -->
+      <section id="tab-data" class="tab-panel">
+        <div class="toolbar">
+          <input type="text" id="filterSearch" placeholder="🔍 Search name or username...">
+          <select id="filterStatus"><option value="">All Status</option></select>
+          <select id="filterFollowUp"><option value="">All Follow Up</option></select>
+          <select id="filterType"><option value="">All Type</option></select>
+          <div class="date-filter-wrap">
+            <label class="date-filter-label" for="filterDateFrom">📅 Trial Date</label>
+            <div class="date-filter-row">
+              <input type="date" id="filterDateFrom" title="From date" placeholder="From">
+              <span class="date-filter-sep">—</span>
+              <input type="date" id="filterDateTo" title="To date" placeholder="To">
+              <button class="btn btn-secondary btn-sm" id="clearDateFilterBtn" title="Clear date filter">✕</button>
+            </div>
+          </div>
+          <button class="btn btn-secondary" id="resetFilterBtn">✕ Reset All</button>
+          <button class="btn btn-danger" id="deleteSelectedBtn" style="margin-left:auto;">🗑 Delete Selected</button>
+        </div>
+        <div class="table-scroll-outer">
+          <button class="table-scroll-btn scroll-left" id="scrollLeftBtn" onclick="scrollTable(-1)" title="Scroll left">&#8249;</button>
+          <div class="table-wrapper" id="psTableWrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="checkbox-cell"><input type="checkbox" id="selectAllCheckbox" title="Select all"></th>
+                <th class="sortable" data-col="#">#<i class="sort-icon">↕</i></th>
+                <th class="sortable" data-col="status">Status<i class="sort-icon">↕</i></th>
+                <th class="sortable" data-col="followUp">Follow Up<i class="sort-icon">↕</i></th>
+                <th class="sortable" data-col="trialDate">Trial Schedule<i class="sort-icon">↕</i></th>
+                <th class="sortable" data-col="name">Name<i class="sort-icon">↕</i></th>
+                <th class="sortable" data-col="username">Username<i class="sort-icon">↕</i></th>
+                <th class="sortable" data-col="email">Email<i class="sort-icon">↕</i></th>
+                <th class="sortable" data-col="phone">Contact<i class="sort-icon">↕</i></th>
+                <th class="sortable" data-col="age">Age<i class="sort-icon">↕</i></th>
+                <th class="sortable" data-col="type">Type<i class="sort-icon">↕</i></th>
+                <th class="sortable" data-col="domicile">Domicile<i class="sort-icon">↕</i></th>
+                <th class="sortable" data-col="occupation">Occupation<i class="sort-icon">↕</i></th>
+                <th class="sortable" data-col="placeOfOccupation">Institution<i class="sort-icon">↕</i></th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="psTableBody"></tbody>
+          </table>
+        </div>
+          <button class="table-scroll-btn scroll-right" id="scrollRightBtn" onclick="scrollTable(1)" title="Scroll right">&#8250;</button>
+        </div>
+        <div class="empty-state" id="psEmptyState" hidden>📭 No PS data yet. Add a new PS!</div>
+      </section>
+
+      <!-- ===== TAB: EXPORT & SYNC ===== -->
+      <section id="tab-importexport" class="tab-panel">
+
+        <!-- Google Sheets Sync Card -->
+        <div class="card" style="margin-bottom:16px;border-left:4px solid var(--success);">
+          <h3 style="font-size:15px;font-weight:800;margin-bottom:4px;">🔄 Google Sheets Sync</h3>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px;">
+            Sambungkan ke Google Sheets agar data bisa diakses dari perangkat manapun.
+          </p>
+
+          <!-- URL Input -->
+          <div style="margin-bottom:12px;">
+            <label for="syncUrlInput" style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:5px;display:block;">Apps Script URL</label>
+            <div class="sync-row">
+              <input type="text" id="syncUrlInput"
+                placeholder="https://script.google.com/macros/s/.../exec"
+                value="https://script.google.com/macros/s/AKfycbyTh9L7RPOfBobrFTXEdnVdHMpIVAM5sbfxDMIV7TskEpy8_feo7UBE4emAE5D4RxY/exec"
+                oninput="settings.sheetSyncUrl=this.value.trim();saveSettings();"
+              >
+              <button class="btn btn-secondary" onclick="pingSheets()">🔌 Test</button>
+            </div>
+          </div>
+
+          <!-- Auto sync toggle -->
+          <label class="sync-checkbox-label" style="margin-bottom:14px;">
+            <input type="checkbox" id="autoSyncCheck"
+              onchange="settings.autoSync=this.checked;saveSettings();showToast(this.checked?'Auto-sync aktif':'Auto-sync dimatikan');">
+            Auto-sync setiap kali data berubah (tambah / edit / hapus)
+          </label>
+
+          <!-- Action buttons -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button class="btn btn-primary" onclick="pushToSheets(false)">⬆️ Push ke Sheets</button>
+            <button class="btn btn-secondary" onclick="pullFromSheets()">⬇️ Pull dari Sheets</button>
+          </div>
+
+          <!-- Status + last sync -->
+          <div id="syncStatus" class="sync-status idle" style="margin-top:10px;"></div>
+          <div id="lastSyncLabel" style="font-size:12px;color:var(--ink-soft);margin-top:4px;"></div>
+
+          <!-- Help text -->
+          <div style="margin-top:14px;padding:10px 14px;background:var(--info-bg);border:1px solid #BFDBFE;border-radius:var(--radius-sm);font-size:12px;color:#1e40af;line-height:1.6;">
+            <strong>📌 Cara pakai:</strong><br>
+            • <strong>Push ke Sheets</strong> → kirim semua data dari website ke Google Sheets<br>
+            • <strong>Pull dari Sheets</strong> → ambil data dari Google Sheets ke website (timpa data lokal)<br>
+            • Aktifkan <strong>Auto-sync</strong> agar data otomatis ke-push setiap ada perubahan
+          </div>
+        </div>
+
+        <!-- Import Card -->
+        <div class="card" style="margin-bottom:16px;">
+          <h3 style="font-size:15px;font-weight:800;margin-bottom:6px;">📥 Import Data</h3>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px;">
+            Import PS data from an Excel (.xlsx) or CSV (.csv) file — for example, a file downloaded from Google Sheets.<br>
+            <strong style="color:var(--ink);">Duplicate records (same Name + Trial Date) will be skipped automatically.</strong>
+          </p>
+
+          <!-- Drop zone -->
+          <div class="import-dropzone" id="importDropzone">
+            <div class="import-drop-icon">📂</div>
+            <div class="import-drop-label">Drag &amp; drop file here, or</div>
+            <label class="btn btn-primary" style="margin-top:10px;cursor:pointer;">
+              Browse File
+              <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+            </label>
+            <div class="import-drop-hint">.xlsx, .xls, or .csv — max 10 MB</div>
+          </div>
+
+          <!-- Preview -->
+          <div id="importPreviewWrap" hidden>
+            <div class="import-preview-header">
+              <span id="importPreviewLabel"></span>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-secondary btn-sm" id="importCancelBtn">✕ Cancel</button>
+                <button class="btn btn-primary" id="importConfirmBtn">✅ Import</button>
+              </div>
+            </div>
+            <div class="table-wrapper" style="margin-top:10px;max-height:320px;overflow-y:auto;">
+              <table>
+                <thead id="importPreviewHead"></thead>
+                <tbody id="importPreviewBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="importStatus" class="sync-status idle" style="margin-top:12px;"></div>
+        </div>
+        <div class="card io-card" style="margin-bottom:16px;">
+          <h3>📤 Export Data</h3>
+          <p>Download all stored PS data as a local backup.</p>
+          <div id="exportReminderBanner" hidden style="margin-bottom:12px;padding:10px 14px;background:var(--warning-bg);border:1px solid #FCD34D;border-radius:8px;font-size:13px;color:#92400E;font-weight:600;">
+            ⚠️ It's been <span id="exportDaysAgo"></span> days since your last export. Export now to avoid data loss!
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="exportXlsxBtn">📊 Export to Excel (.xlsx)</button>
+            <button class="btn btn-secondary" id="exportCsvBtn">📄 Export to CSV (.csv)</button>
+          </div>
+          <div id="lastExportLabel" style="margin-top:10px;font-size:12px;color:var(--ink-soft);"></div>
+        </div>
+        <!-- WA Templates Settings -->
+        <div class="card" style="margin-bottom:16px;">
+          <h3 style="font-size:15px;font-weight:800;margin-bottom:6px;">💬 WA Message Templates</h3>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px;">
+            Edit templates below. Use <code>{nama}</code>, <code>{tanggal}</code>, <code>{waktu}</code> as placeholders — they'll be replaced with the PS's actual data when you copy.
+          </p>
+          <div id="waTemplatesContainer"></div>
+        </div>
+
+        <div class="card">
+          <h3 style="font-size:14px;font-weight:800;margin-bottom:8px;">Spreadsheet Column Format</h3>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:10px;">
+            The following column names are used during sync &amp; export:
+          </p>
+          <div class="column-ref">
+            <span>Trial Class Date</span><span>Trial Class Time</span><span>Status</span>
+            <span>Follow Up</span><span>Type</span><span>Username</span><span>Name</span>
+            <span>Email</span><span>Phone Number</span><span>Age</span><span>Domicile</span>
+            <span>Occupation</span><span>Place of Occupation</span><span>Note</span>
+          </div>
+          <div class="alias-note">
+            If your old spreadsheet uses Indonesian column names, these aliases will be recognised
+            during the first data pull: <strong>No HP</strong> → Phone Number,
+            <strong>Umur</strong> → Age, <strong>Domisili</strong> → Domicile,
+            <strong>Pekerjaan</strong> → Occupation, <strong>Instansi</strong> → Place of Occupation,
+            <strong>Keterangan</strong> → Note.
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TAB: NOTES ===== -->
+      <section id="tab-notes" class="tab-panel">
+
+        <!-- Toolbar -->
+        <div class="notes-toolbar">
+          <input type="text" id="notesSearch" placeholder="🔍 Search notes...">
+          <button class="btn btn-primary" id="addNoteBtn">＋ Add Note</button>
+        </div>
+
+        <!-- Notes grid -->
+        <div class="notes-grid" id="notesGrid"></div>
+
+        <!-- Empty state -->
+        <div class="notes-empty" id="notesEmpty" hidden>
+          <div style="font-size:36px;margin-bottom:10px;">📝</div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:6px;">No notes yet</div>
+          <div style="color:var(--ink-soft);font-size:13px;">Click "＋ Add Note" to create your first sticky note.</div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===== MODAL: STARTUP REMINDER ===== -->
+<div class="modal-overlay" id="startupModal" style="z-index:2000;">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>🔔 Today's Reminders</h2>
+      <button class="modal-close" id="startupModalClose">&times;</button>
+    </div>
+    <div class="modal-body" id="startupModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="startupDismissBtn">Dismiss</button>
+      <button class="btn btn-primary" id="startupViewBtn">View Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: EDIT PS ===== -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>✏️ Edit PS Data</h2>
+      <button class="modal-close" id="editModalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" id="editFormContainer"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="editCancelBtn">Cancel</button>
+      <button class="btn btn-primary" id="editSaveBtn">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: RESCHEDULE ===== -->
+<div class="modal-overlay" id="rescheduleModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>🔄 Reschedule Trial Class</h2>
+      <button class="modal-close" id="rescheduleModalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="warning-box">
+        After selecting a new schedule, the status will automatically reset to <strong>Unreserved</strong> so you don't forget to send the war message again at 10 AM.
+      </div>
+      <div class="reschedule-name" id="rescheduleName"></div>
+      <div class="form-section-grid">
+        <div class="form-row">
+          <label for="r-trialDate">New Date</label>
+          <input type="date" id="r-trialDate">
+        </div>
+        <div class="form-row">
+          <label for="r-trialTime">Time Slot</label>
+          <select id="r-trialTime">
+            <option value="" disabled selected>— Select date first —</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="rescheduleCancelBtn">Cancel</button>
+      <button class="btn btn-primary" id="rescheduleSaveBtn">🔄 Save New Schedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ==========================================================
+   CONSTANTS
+   ========================================================== */
+const STORAGE_KEY = 'lead_manager_ps_v2';
+const SETTINGS_KEY = 'lead_manager_settings_v1';
+
+const STATUS_OPTIONS   = ['Unreserved','Reserved','Attended','Half','Absent','Reschedule'];
+const FOLLOWUP_OPTIONS = ['Not Followed Up','Responded Well','No Response'];
+const TYPE_OPTIONS     = ['AMC','OKTB'];
+
+const STATUS_COLOR = {
+  'Unreserved':'red',
+  'Reserved':'blue',
+  'Attended':'green',
+  'Half':'orange',
+  'Absent':'gray',
+  'Reschedule':'purple'
+};
+const FOLLOWUP_COLOR = {
+  'Not Followed Up':'red',
+  'Responded Well':'green',
+  'No Response':'gray'
+};
+const TYPE_COLOR = { 'AMC':'blue', 'OKTB':'purple' };
+
+const COLOR_HEX = {
+  red:'#DC2626', blue:'#2563EB', green:'#16A34A',
+  orange:'#D97706', gray:'#6B7280', purple:'#7C3AED'
+};
+
+// Legacy Indonesian value map → new English values (for backward compat with old localStorage)
+const LEGACY_STATUS_MAP = {
+  'Belum War':'Unreserved',
+  'Sudah War & Dikasih ke PS':'Reserved',
+  'Attended':'Attended',
+  'Half':'Half',
+  'Absent':'Absent',
+  'Reschedule':'Reschedule'
+};
+const LEGACY_FOLLOWUP_MAP = {
+  'Belum Difollow Up':'Not Followed Up',
+  'Direspon Baik':'Responded Well',
+  'Tidak Direspon':'No Response'
+};
+
+const DAYS_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS_SHORT_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const TAB_INFO = {
+  dashboard:{title:'Dashboard', subtitle:'Performance summary & today\'s reminders'},
+  tambah:{title:'Add PS', subtitle:'Record new Potential Student data'},
+  data:{title:'PS Data', subtitle:'Manage all potential student records'},
+  importexport:{title:'Import & Export', subtitle:'Import data from Excel/CSV or export as backup'},
+  notes:{title:'Notes', subtitle:'Sticky notes & personal brainstorming'}
+};
+
+const FORM_SECTIONS = [
+  {
+    title:'📅 Trial Class Schedule',
+    full:true,
+    fields:[
+      {key:'trialDate', label:'Trial Class Date', type:'date'},
+      {key:'trialTime', label:'Time Slot', type:'timeslot'}
+    ]
+  },
+  {
+    title:'📊 Status & Info',
+    full:true,
+    fields:[
+      {key:'status',   label:'Status',    type:'select', options:STATUS_OPTIONS},
+      {key:'followUp', label:'Follow Up', type:'select', options:FOLLOWUP_OPTIONS},
+      {key:'type',     label:'Type',      type:'select', options:TYPE_OPTIONS}
+    ]
+  },
+  {
+    title:'👤 Personal Data',
+    full:true,
+    fields:[
+      {key:'username',  label:'Username (Social Media)', type:'text',   placeholder:'@username'},
+      {key:'name',      label:'Full Name',               type:'text',   required:true},
+      {key:'email',     label:'Email',                   type:'email'},
+      {key:'phone',     label:'Contact / WA Number',     type:'tel',    placeholder:'08xxxxxxxxxx'},
+      {key:'age',       label:'Age',                     type:'number', min:5, max:99},
+      {key:'domicile',  label:'Domicile',                type:'text'}
+    ]
+  },
+  {
+    title:'💼 Occupation',
+    full:true,
+    fields:[
+      {key:'occupation',        label:'Occupation',              type:'text', placeholder:'Student / Employee'},
+      {key:'placeOfOccupation', label:'Institution / Workplace', type:'text'}
+    ]
+  },
+  {
+    title:'📝 Notes',
+    full:true,
+    fields:[
+      {key:'note', label:'Note', type:'textarea', full:true}
+    ]
+  }
+];
+
+/* ==========================================================
+   STATE
+   ========================================================== */
+let psData   = loadData();
+let settings = loadSettings();
+
+let currentReminderIds = new Set();
+let selectedIds = new Set();
+let editingId     = null;
+let rescheduleId  = null;
+
+// Sort state: col = data-col key, dir = 'asc'|'desc'|null
+let sortState = { col: null, dir: null };
+
+// Reminder checklist state — stored per day so it auto-resets tomorrow
+const REMINDER_CHECK_KEY = 'lead_manager_reminder_checks_v1';
+let checkedReminders = {}; // key: psId+tag → checked date string 'YYYY-MM-DD'
+
+function loadCheckedReminders(){
+  try{
+    const raw = localStorage.getItem(REMINDER_CHECK_KEY);
+    checkedReminders = raw ? JSON.parse(raw) : {};
+    // Clean up entries older than today
+    const today = getToday().toISOString().slice(0,10);
+    Object.keys(checkedReminders).forEach(k=>{
+      if(checkedReminders[k] !== today) delete checkedReminders[k];
+    });
+    saveCheckedReminders();
+  }catch(e){ checkedReminders = {}; }
+}
+function saveCheckedReminders(){
+  localStorage.setItem(REMINDER_CHECK_KEY, JSON.stringify(checkedReminders));
+}
+function reminderKey(r){ return r.ps.id + '||' + r.tag; }
+function isReminderChecked(r){
+  const today = getToday().toISOString().slice(0,10);
+  return checkedReminders[reminderKey(r)] === today;
+}
+function toggleReminder(key){
+  const today = getToday().toISOString().slice(0,10);
+  if(checkedReminders[key] === today){
+    delete checkedReminders[key];
+  } else {
+    checkedReminders[key] = today;
+  }
+  saveCheckedReminders();
+}
+
+// Dashboard month state
+const now0 = new Date();
+let dashMonth = { year: now0.getFullYear(), month: now0.getMonth() }; // 0-based month
+
+/* ==========================================================
+   PERSISTENCE
+   ========================================================== */
+function migrateLegacyData(arr){
+  // Convert old Indonesian field values to English
+  return arr.map(ps => {
+    const p = {...ps};
+    if(LEGACY_STATUS_MAP[p.status])   p.status   = LEGACY_STATUS_MAP[p.status];
+    if(LEGACY_FOLLOWUP_MAP[p.followUp]) p.followUp = LEGACY_FOLLOWUP_MAP[p.followUp];
+    return p;
+  });
+}
+function loadData(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    return migrateLegacyData(raw);
+  }catch(e){ return []; }
+}
+function loadSettings(){
+  let s;
+  try{ s = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; }
+  catch(e){ s = {}; }
+  const defaults = { target:20, sheetSyncUrl:'https://script.google.com/macros/s/AKfycbyTh9L7RPOfBobrFTXEdnVdHMpIVAM5sbfxDMIV7TskEpy8_feo7UBE4emAE5D4RxY/exec', autoSync:false, lastSync:null };
+  return Object.assign(defaults, s);
+}
+function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(psData)); }
+function saveSettings(){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+
+/* ==========================================================
+   HELPERS
+   ========================================================== */
+function escapeHTML(str){
+  if(str===null||str===undefined) return '';
+  return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function pad2(n){ return String(n).padStart(2,'0'); }
+function generateId(){ return 'ps_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function dateStrToDate(s){ return new Date(s+'T00:00:00'); }
+function getToday(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
+function isSameDate(a,b){
+  return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+}
+function formatDateShort(dateStr){
+  if(!dateStr) return '';
+  const d = dateStrToDate(dateStr);
+  return `${d.getDate()} ${MONTHS_SHORT_EN[d.getMonth()]} ${d.getFullYear()}`;
+}
+function colorFor(kind,value){
+  if(kind==='status')   return STATUS_COLOR[value]  ||'gray';
+  if(kind==='followUp') return FOLLOWUP_COLOR[value]||'gray';
+  if(kind==='type')     return TYPE_COLOR[value]    ||'gray';
+  return 'gray';
+}
+function waLink(phone){
+  if(!phone) return null;
+  const digits = String(phone).replace(/\D/g,'');
+  if(!digits) return null;
+  const num = digits.startsWith('0') ? digits.slice(1) : digits;
+  return `https://wa.me/62${num}`;
+}
+function getTimeSlotOptions(dateStr){
+  if(!dateStr) return null;
+  const day = dateStrToDate(dateStr).getDay();
+  if(day===0) return ['10.00 – 12.00 WIB','14.00 – 16.00 WIB'];
+  return ['13.30 – 15.30 WIB','19.00 – 21.00 WIB'];
+}
+
+/* ==========================================================
+   FORM BUILDING (shared by Add PS + Edit Modal)
+   ========================================================== */
+function buildFormHTML(prefix){
+  return FORM_SECTIONS.map(section=>{
+    const fieldsHTML = section.fields.map(f=>buildFieldHTML(prefix,f)).join('');
+    return `<div class="form-section${section.full?' form-section-full':''}">
+      <div class="form-section-title">${section.title}</div>
+      <div class="form-section-grid">${fieldsHTML}</div>
+    </div>`;
+  }).join('');
+}
+function buildFieldHTML(prefix,f){
+  const id=`${prefix}-${f.key}`;
+  let input;
+  if(f.type==='select'){
+    input=`<select id="${id}">${f.options.map(o=>`<option value="${escapeHTML(o)}">${escapeHTML(o)}</option>`).join('')}</select>`;
+  }else if(f.type==='textarea'){
+    input=`<textarea id="${id}" rows="3"></textarea>`;
+  }else if(f.type==='timeslot'){
+    input=`<select id="${id}" disabled><option value="" disabled selected>— Select date first —</option></select>`;
+  }else{
+    input=`<input type="${f.type}" id="${id}"${f.placeholder?` placeholder="${escapeHTML(f.placeholder)}"`:''}${f.min!==undefined?` min="${f.min}"`:''}${f.max!==undefined?` max="${f.max}"`:''}>`;
+  }
+  return `<div class="form-row${f.full?' form-row-full':''}"><label for="${id}">${escapeHTML(f.label)}${f.required?' *':''}</label>${input}</div>`;
+}
+function updateTimeSlotSelect(dateEl,timeEl,currentValue){
+  const slots=getTimeSlotOptions(dateEl.value);
+  timeEl.innerHTML='';
+  if(!slots){
+    const opt=document.createElement('option');
+    opt.value='';opt.textContent='— Select date first —';opt.disabled=true;opt.selected=true;
+    timeEl.appendChild(opt);
+    timeEl.disabled=true;
+    return;
+  }
+  timeEl.disabled=false;
+  slots.forEach(s=>{
+    const opt=document.createElement('option');
+    opt.value=s;opt.textContent=s;
+    if(s===currentValue) opt.selected=true;
+    timeEl.appendChild(opt);
+  });
+}
+function fillForm(prefix,ps){
+  FORM_SECTIONS.forEach(section=>section.fields.forEach(f=>{
+    if(f.key==='trialTime') return;
+    const el=document.getElementById(`${prefix}-${f.key}`);
+    if(!el) return;
+    if(f.type==='select'){
+      if(ps&&ps[f.key]) el.value=ps[f.key];
+      else el.selectedIndex=0;
+    }else{
+      el.value=ps?(ps[f.key]??''):'';
+    }
+  }));
+  const dateEl=document.getElementById(`${prefix}-trialDate`);
+  const timeEl=document.getElementById(`${prefix}-trialTime`);
+  updateTimeSlotSelect(dateEl,timeEl,ps?(ps.trialTime||''):'');
+  dateEl.onchange=()=>updateTimeSlotSelect(dateEl,timeEl,'');
+}
+function getFormData(prefix){
+  const data={};
+  FORM_SECTIONS.forEach(section=>section.fields.forEach(f=>{
+    const el=document.getElementById(`${prefix}-${f.key}`);
+    data[f.key]=el?el.value.trim():'';
+  }));
+  return data;
+}
+
+/* ==========================================================
+   REMINDERS
+   ========================================================== */
+function computeReminders(){
+  const reminders=[];
+  const today=getToday();
+  const tomorrow=new Date(today); tomorrow.setDate(today.getDate()+1);
+  const yesterday=new Date(today); yesterday.setDate(today.getDate()-1);
+
+  const dayPlus3=new Date(today); dayPlus3.setDate(today.getDate()+3);
+
+  psData.forEach(ps=>{
+    if(!ps.trialDate||!ps.trialTime){
+      reminders.push({type:'urgent',tag:'No Schedule Yet',message:'Send available schedule to PS via WA immediately',ps});
+      return;
+    }
+    const trialDate=dateStrToDate(ps.trialDate);
+    if(ps.status==='Unreserved'&&trialDate>=today){
+      reminders.push({type:'urgent',tag:'Send Reservation at 10 AM',message:`Trial: ${formatDateShort(ps.trialDate)}, ${ps.trialTime}`,ps});
+    }
+    if(isSameDate(trialDate,dayPlus3)&&ps.status==='Reserved'){
+      reminders.push({type:'warning',tag:'Follow Up H-3',message:`Trial in 3 days: ${formatDateShort(ps.trialDate)}, ${ps.trialTime} — confirm attendance`,ps});
+    }
+    if(isSameDate(trialDate,tomorrow)&&ps.status==='Reserved'){
+      reminders.push({type:'warning',tag:'Follow Up H-1',message:`Trial tomorrow: ${formatDateShort(ps.trialDate)}, ${ps.trialTime} — send reminder`,ps});
+    }
+    if(isSameDate(trialDate,today)){
+      reminders.push({type:'info',tag:'Trial Class Today',message:`Trial time: ${ps.trialTime}`,ps});
+    }
+    if(isSameDate(trialDate,yesterday)&&ps.status==='Attended'){
+      reminders.push({type:'info',tag:'Follow Up H+1',message:'Say thank you (谢谢) & ask for a testimonial from PS',ps});
+    }
+  });
+
+  const order={urgent:0,warning:1,info:2};
+  reminders.sort((a,b)=>order[a.type]-order[b.type]);
+  return reminders;
+}
+
+/* ==========================================================
+   RENDERING
+   ========================================================== */
+function isTabActive(tab){
+  const el=document.getElementById(`tab-${tab}`);
+  return el&&el.classList.contains('active');
+}
+
+function renderAll(){
+  const reminders=computeReminders();
+  currentReminderIds=new Set(reminders.map(r=>r.ps.id));
+
+  const badge=document.getElementById('reminderBadge');
+  const uncheckedCount=reminders.filter(r=>!isReminderChecked(r)).length;
+  if(uncheckedCount===0){ badge.hidden=true; }
+  else{ badge.hidden=false; badge.textContent=uncheckedCount; }
+
+  if(isTabActive('dashboard')){
+    renderMonthPickerLabel();
+    renderTargetBanner();
+    renderReminderGrid(reminders);
+    renderStats();
+    renderCharts();
+  }
+  if(isTabActive('data')){
+    renderTable();
+  }
+  if(isTabActive('notes')){
+    renderNotes();
+  }
+  if(isTabActive('importexport')){
+    renderWaTemplatesSettings();
+    updateExportReminderUI();
+    updateSyncUI();
+  }
+}
+
+function renderMonthPickerLabel(){
+  const MONTHS_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('monthPickerLabel').textContent=
+    MONTHS_FULL[dashMonth.month]+' '+dashMonth.year;
+}
+
+function getMonthData(){
+  return psData.filter(ps=>{
+    if(!ps.trialDate) return false;
+    const d=dateStrToDate(ps.trialDate);
+    return d.getFullYear()===dashMonth.year && d.getMonth()===dashMonth.month;
+  });
+}
+
+function renderTargetBanner(){
+  const now=new Date();
+  const isCurrentMonth=(dashMonth.year===now.getFullYear()&&dashMonth.month===now.getMonth());
+  const monthData=getMonthData();
+  const attended=monthData.filter(ps=>ps.status==='Attended').length;
+  const target=settings.target||20;
+  const daysInMonth=new Date(dashMonth.year,dashMonth.month+1,0).getDate();
+  const currentDay=isCurrentMonth?now.getDate():daysInMonth;
+  const daysLeft=isCurrentMonth?Math.max(0,daysInMonth-currentDay+1):0;
+  const needed=Math.max(0,target-attended);
+  const pct=target>0?Math.min(100,Math.round((attended/target)*100)):0;
+
+  let status,message;
+  if(attended>=target){
+    status='done';
+    message=`🏆 Target achieved! ${attended}/${target} PS Attended. Great job!`;
+  }else if(!isCurrentMonth){
+    status= pct>=70?'warning':'danger';
+    message=`${attended}/${target} PS Attended that month (${pct}% of target).`;
+  }else if(daysLeft<=7&&needed>5){
+    status='danger';
+    message=`🔴 Urgent! Need ${needed} more PS to reach the target, only ${daysLeft} days left.`;
+  }else if(daysLeft<=14&&needed>8){
+    status='warning';
+    message=`🟡 Push it! ${needed} more to reach the target. ${daysLeft} days left.`;
+  }else{
+    status='ontrack';
+    message=`${needed} more to reach the target. ${daysLeft} days left.`;
+  }
+
+  const banner=document.getElementById('targetBanner');
+  banner.classList.remove('status-warning','status-danger','status-done');
+  if(status==='warning') banner.classList.add('status-warning');
+  else if(status==='danger') banner.classList.add('status-danger');
+  else if(status==='done') banner.classList.add('status-done');
+
+  document.getElementById('targetMessage').textContent=message;
+  const fill=document.getElementById('progressFill');
+  fill.style.width=pct+'%';
+  fill.classList.remove('warning','danger');
+  if(status==='warning') fill.classList.add('warning');
+  else if(status==='danger') fill.classList.add('danger');
+
+  document.getElementById('targetAttended').textContent=attended;
+  document.getElementById('targetTarget').textContent=target;
+  document.getElementById('targetPct').textContent=pct+'%';
+  document.getElementById('targetDaysLeft').textContent=isCurrentMonth?daysLeft:'—';
+  document.getElementById('targetNeeded').textContent=needed;
+
+  const targetInput=document.getElementById('targetInput');
+  if(document.activeElement!==targetInput) targetInput.value=target;
+}
+
+function renderReminderGrid(reminders){
+  const grid=document.getElementById('reminderGrid');
+  if(reminders.length===0){
+    grid.innerHTML=`<div class="reminder-empty">✅ No reminders today. All clear!</div>`;
+    return;
+  }
+
+  const pending = reminders.filter(r=>!isReminderChecked(r));
+  const done    = reminders.filter(r=> isReminderChecked(r));
+
+  function cardHTML(r, checked){
+    const ps=r.ps;
+    const wa=waLink(ps.phone);
+    const nameLine=ps.username
+      ?`${escapeHTML(ps.name)} <span class="reminder-username">(${escapeHTML(ps.username)})</span>`
+      :escapeHTML(ps.name||'(No name)');
+    const key=reminderKey(r);
+    const psId=escapeHTML(ps.id);
+    return `<div class="reminder-card ${r.type}${checked?' done-check':''}" data-rkey="${escapeHTML(key)}">
+      <button class="reminder-check-btn" onclick="onReminderCheck('${escapeHTML(key)}')" title="${checked?'Mark as pending':'Mark as done'}">${checked?'✓':''}</button>
+      <div class="reminder-tag tag-${r.type}">${escapeHTML(r.tag)}</div>
+      <div class="reminder-name">${nameLine}</div>
+      <div class="reminder-phone">📱 ${escapeHTML(ps.phone||'-')}</div>
+      <div class="reminder-message">${escapeHTML(r.message)}</div>
+      <div class="reminder-actions">
+        ${wa?`<a class="btn btn-sm btn-wa" href="${wa}" target="_blank" rel="noopener">💬 WA</a>`:''}
+        <button class="btn-goto" onclick="openWaDropdown(this,'${psId}')">📋 Templates</button>
+        <button class="btn-goto" onclick="gotoPS('${psId}')">🔍 View</button>
+        <button class="btn-edit-inline" onclick="openEditModal('${psId}')">✏️ Edit</button>
+      </div>
+    </div>`;
+  }
+
+  let html = pending.map(r=>cardHTML(r,false)).join('');
+
+  if(done.length>0){
+    // Show a collapsible done section
+    const allDone = pending.length===0;
+    html += `<div class="reminder-done-bar">
+      <span>✅ ${done.length} reminder${done.length>1?'s':''} completed today</span>
+      <button class="reminder-show-done" onclick="toggleDoneReminders(this)">Show</button>
+    </div>
+    <div class="reminder-done-list" style="display:none">
+      ${done.map(r=>cardHTML(r,true)).join('')}
+    </div>`;
+    if(allDone){
+      html = `<div class="reminder-empty">🎉 All reminders done for today!</div>` + html;
+    }
+  }
+
+  grid.innerHTML = html;
+}
+
+function onReminderCheck(key){
+  toggleReminder(key);
+  // Re-render only the reminder grid (fast, no full re-render)
+  const reminders = computeReminders();
+  renderReminderGrid(reminders);
+  // Update badge count (unchecked only)
+  const unchecked = reminders.filter(r=>!isReminderChecked(r)).length;
+  const badge = document.getElementById('reminderBadge');
+  if(unchecked===0){ badge.hidden=true; }
+  else{ badge.hidden=false; badge.textContent=unchecked; }
+}
+
+function toggleDoneReminders(btn){
+  const list = btn.closest('.reminder-done-bar').nextElementSibling;
+  const showing = list.style.display !== 'none';
+  list.style.display = showing ? 'none' : 'block';
+  btn.textContent = showing ? 'Show' : 'Hide';
+}
+
+function renderStats(){
+  const md=getMonthData();
+  document.getElementById('statTotal').textContent=md.length;
+  document.getElementById('statBelumWar').textContent=md.filter(p=>p.status==='Unreserved').length;
+  document.getElementById('statAttended').textContent=md.filter(p=>p.status==='Attended').length;
+  document.getElementById('statHalf').textContent=md.filter(p=>p.status==='Half').length;
+  document.getElementById('statAbsent').textContent=md.filter(p=>p.status==='Absent').length;
+  document.getElementById('statAMC').textContent=md.filter(p=>p.type==='AMC').length;
+  document.getElementById('statOKTB').textContent=md.filter(p=>p.type==='OKTB').length;
+}
+
+function renderCharts(){
+  renderNotFollowedUpList();
+  renderUnreservedList();
+}
+
+function renderNotFollowedUpList(){
+  const container = document.getElementById('notFollowedUpList');
+  if(!container) return;
+
+  // PS with followUp = 'Not Followed Up', sorted by trial date ascending
+  const list = psData
+    .filter(ps => ps.followUp === 'Not Followed Up')
+    .sort((a,b) => {
+      if(!a.trialDate && !b.trialDate) return 0;
+      if(!a.trialDate) return 1;
+      if(!b.trialDate) return -1;
+      return a.trialDate.localeCompare(b.trialDate);
+    });
+
+  if(list.length === 0){
+    container.innerHTML = '<div class="unreserved-empty" style="background:var(--success-bg);border-color:#BBF0CE;color:#14532D;">✅ All PS have been followed up!</div>';
+    return;
+  }
+
+  const today = getToday();
+  const rows = list.map((ps, i) => {
+    const wa = waLink(ps.phone);
+    const psId = escapeHTML(ps.id);
+
+    let trialCell = '-';
+    let urgency = '';
+    if(ps.trialDate){
+      const td = dateStrToDate(ps.trialDate);
+      const diffDays = Math.round((td - today) / (1000*60*60*24));
+      trialCell = `${formatDateShort(ps.trialDate)}${ps.trialTime ? `<span class="trial-time">${escapeHTML(ps.trialTime)}</span>` : ''}`;
+      if(diffDays < 0)       urgency = '<span class="badge badge-gray"   style="margin-left:6px;">Past</span>';
+      else if(diffDays === 0) urgency = '<span class="badge badge-red"    style="margin-left:6px;">Today!</span>';
+      else if(diffDays <= 2)  urgency = '<span class="badge badge-orange" style="margin-left:6px;">' + diffDays + 'd left</span>';
+      else                    urgency = '<span class="badge badge-blue"   style="margin-left:6px;">' + diffDays + 'd left</span>';
+    }
+
+    return `<tr>
+      <td style="color:var(--ink-soft);font-size:12px;">${i+1}</td>
+      <td><strong>${escapeHTML(ps.name||'-')}</strong>${ps.username ? `<br><span style="color:var(--ink-soft);font-size:12px;">${escapeHTML(ps.username)}</span>` : ''}</td>
+      <td>${trialCell}${urgency}</td>
+      <td><span class="badge badge-${colorFor('status', ps.status)}">${escapeHTML(ps.status||'-')}</span></td>
+      <td>${escapeHTML(ps.phone||'-')}</td>
+      <td><span class="badge badge-${colorFor('type', ps.type)}">${escapeHTML(ps.type||'-')}</span></td>
+      <td>
+        <div class="action-cell">
+          ${wa ? `<a class="btn btn-sm btn-wa" href="${wa}" target="_blank" rel="noopener">💬 WA</a>` : ''}
+          <button class="btn-goto" onclick="openWaDropdown(this,'${psId}')">📋 Templates</button>
+          <button class="btn-goto" onclick="gotoPS('${psId}')">🔍 View</button>
+          <button class="btn-edit-inline" onclick="openEditModal('${psId}')">✏️ Edit</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="table-wrapper">
+      <table class="unreserved-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name / Username</th>
+            <th>Trial Schedule</th>
+            <th>Status</th>
+            <th>Contact</th>
+            <th>Type</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderUnreservedList(){
+  const container=document.getElementById('unreservedList');
+  if(!container) return;
+
+  // All unreserved PS (not filtered by month — show all pending action)
+  const unreserved=psData.filter(p=>p.status==='Unreserved');
+
+  if(unreserved.length===0){
+    container.innerHTML='<div class="unreserved-empty">✅ All PS have been reserved! No pending action.</div>';
+    return;
+  }
+
+  // Sort: earliest trial date first; no date → bottom
+  const sorted=[...unreserved].sort((a,b)=>{
+    if(!a.trialDate&&!b.trialDate) return 0;
+    if(!a.trialDate) return 1;
+    if(!b.trialDate) return -1;
+    return a.trialDate.localeCompare(b.trialDate);
+  });
+
+  const today=getToday();
+  const rows=sorted.map((ps,i)=>{
+    const wa=waLink(ps.phone);
+    let trialCell='-';
+    let urgency='';
+    if(ps.trialDate){
+      const td=dateStrToDate(ps.trialDate);
+      const diffMs=td-today;
+      const diffDays=Math.round(diffMs/(1000*60*60*24));
+      trialCell=`${formatDateShort(ps.trialDate)}${ps.trialTime?`<span class="trial-time">${escapeHTML(ps.trialTime)}</span>`:''}`;
+      if(diffDays<0) urgency='<span class="badge badge-gray" style="margin-left:6px;">Past</span>';
+      else if(diffDays===0) urgency='<span class="badge badge-red" style="margin-left:6px;">Today!</span>';
+      else if(diffDays<=2) urgency='<span class="badge badge-orange" style="margin-left:6px;">'+diffDays+'d left</span>';
+      else urgency='<span class="badge badge-blue" style="margin-left:6px;">'+diffDays+'d left</span>';
+    }
+    const psId=escapeHTML(ps.id);
+    return `<tr>
+      <td style="color:var(--ink-soft);font-size:12px;">${i+1}</td>
+      <td><strong>${escapeHTML(ps.name||'-')}</strong>${ps.username?`<br><span style="color:var(--ink-soft);font-size:12px;">${escapeHTML(ps.username)}</span>`:''}</td>
+      <td>${trialCell}${urgency}</td>
+      <td>${escapeHTML(ps.phone||'-')}</td>
+      <td><span class="badge badge-${colorFor('type',ps.type)}">${escapeHTML(ps.type||'-')}</span></td>
+      <td>
+        <div class="action-cell">
+          ${wa?`<a class="btn btn-sm btn-wa" href="${wa}" target="_blank" rel="noopener">💬 WA</a>`:''}
+          <button class="btn-goto" onclick="openWaDropdown(this,'${psId}')">📋 Templates</button>
+          <button class="btn-goto" onclick="gotoPS('${psId}')">🔍 View</button>
+          <button class="btn-edit-inline" onclick="openEditModal('${psId}')">✏️ Edit</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML=`
+    <div class="table-wrapper">
+      <table class="unreserved-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name / Username</th>
+            <th>Trial Schedule</th>
+            <th>Contact</th>
+            <th>Type</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+/* ==========================================================
+   FILTER & SORT
+   ========================================================== */
+function getFilteredData(){
+  const search=document.getElementById('filterSearch').value.trim().toLowerCase();
+  const status=document.getElementById('filterStatus').value;
+  const followUp=document.getElementById('filterFollowUp').value;
+  const type=document.getElementById('filterType').value;
+  const dateFrom=document.getElementById('filterDateFrom').value; // 'YYYY-MM-DD' or ''
+  const dateTo=document.getElementById('filterDateTo').value;
+
+  return psData.filter(ps=>{
+    if(search){
+      const hay=`${ps.name||''} ${ps.username||''}`.toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    if(status&&ps.status!==status) return false;
+    if(followUp&&ps.followUp!==followUp) return false;
+    if(type&&ps.type!==type) return false;
+    if(dateFrom||dateTo){
+      const d=ps.trialDate||'';
+      if(!d) return false;
+      if(dateFrom&&d<dateFrom) return false;
+      if(dateTo&&d>dateTo) return false;
+    }
+    return true;
+  });
+}
+
+function getSortedData(data){
+  if(!sortState.col||!sortState.dir) {
+    // Default: newest first (reverse insertion order)
+    return [...data].reverse();
+  }
+  const col=sortState.col;
+  const dir=sortState.dir==='asc'?1:-1;
+
+  return [...data].sort((a,b)=>{
+    let va,vb;
+    if(col==='#'){
+      // sort by original index in psData
+      va=psData.indexOf(a);
+      vb=psData.indexOf(b);
+    }else if(col==='trialDate'){
+      va=a.trialDate||'';
+      vb=b.trialDate||'';
+    }else if(col==='age'){
+      va=parseFloat(a.age)||0;
+      vb=parseFloat(b.age)||0;
+      return (va-vb)*dir;
+    }else{
+      va=String(a[col]||'').toLowerCase();
+      vb=String(b[col]||'').toLowerCase();
+    }
+    if(va<vb) return -1*dir;
+    if(va>vb) return  1*dir;
+    return 0;
+  });
+}
+
+function updateSortHeaders(){
+  document.querySelectorAll('th.sortable').forEach(th=>{
+    th.classList.remove('sort-asc','sort-desc');
+    const icon=th.querySelector('.sort-icon');
+    if(th.dataset.col===sortState.col){
+      th.classList.add(sortState.dir==='asc'?'sort-asc':'sort-desc');
+      icon.textContent=sortState.dir==='asc'?'↑':'↓';
+    }else{
+      icon.textContent='↕';
+    }
+  });
+}
+
+/* ==========================================================
+   TABLE RENDER
+   ========================================================== */
+function renderTable(){
+  const filtered=getFilteredData();
+  const data=getSortedData(filtered);
+  const tbody=document.getElementById('psTableBody');
+  const wrapper=document.getElementById('psTableWrapper');
+  const empty=document.getElementById('psEmptyState');
+  const selectAll=document.getElementById('selectAllCheckbox');
+
+  updateSortHeaders();
+
+  if(data.length===0){
+    tbody.innerHTML='';
+    wrapper.hidden=true;
+    empty.hidden=false;
+    selectAll.checked=false;
+    selectAll.indeterminate=false;
+    updateDeleteSelectedButton();
+    return;
+  }
+  wrapper.hidden=false;
+  empty.hidden=true;
+
+  tbody.innerHTML=data.map((ps,idx)=>{
+    const hasReminder=currentReminderIds.has(ps.id);
+    const isSelected=selectedIds.has(ps.id);
+    // Display index: in default (newest-first) mode, idx+1 counts from top
+    const displayNum=idx+1;
+    const trialInfo=ps.trialDate
+      ?`${formatDateShort(ps.trialDate)}${ps.trialTime?`<span class="trial-time">${escapeHTML(ps.trialTime)}</span>`:''}`
+      :'-';
+    const wa=waLink(ps.phone);
+    const rowClasses=[hasReminder?'has-reminder':'',isSelected?'row-selected':''].filter(Boolean).join(' ');
+    return `<tr class="${rowClasses}" data-id="${ps.id}">
+      <td class="checkbox-cell"><input type="checkbox" class="row-checkbox" data-id="${ps.id}" ${isSelected?'checked':''}></td>
+      <td>${hasReminder?'🔴 ':''}${displayNum}</td>
+      <td><span class="badge badge-${colorFor('status',ps.status)}">${escapeHTML(ps.status)}</span></td>
+      <td><span class="badge badge-${colorFor('followUp',ps.followUp)}">${escapeHTML(ps.followUp)}</span></td>
+      <td>${trialInfo}</td>
+      <td>${escapeHTML(ps.name)}</td>
+      <td>${escapeHTML(ps.username||'-')}</td>
+      <td>${escapeHTML(ps.email||'-')}</td>
+      <td>${escapeHTML(ps.phone||'-')}</td>
+      <td>${escapeHTML(ps.age||'-')}</td>
+      <td><span class="badge badge-${colorFor('type',ps.type)}">${escapeHTML(ps.type)}</span></td>
+      <td>${escapeHTML(ps.domicile||'-')}</td>
+      <td>${escapeHTML(ps.occupation||'-')}</td>
+      <td>${escapeHTML(ps.placeOfOccupation||'-')}</td>
+      <td class="action-cell">
+        ${wa?`<a class="btn-icon" href="${wa}" target="_blank" rel="noopener" title="Open WA">💬</a>`:''}
+        <button class="btn-icon" title="WA Templates" onclick="openWaDropdown(this,'${ps.id}')">📋</button>
+        ${ps.status==='Reschedule'?`<button class="btn-icon" title="Reschedule" data-action="reschedule" data-id="${ps.id}">🔄</button>`:''}
+        <button class="btn-icon" title="Edit" data-action="edit" data-id="${ps.id}">✏️</button>
+        <button class="btn-icon" title="Delete" data-action="delete" data-id="${ps.id}">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const allSelected=data.every(ps=>selectedIds.has(ps.id));
+  const someSelected=data.some(ps=>selectedIds.has(ps.id));
+  selectAll.checked=allSelected;
+  selectAll.indeterminate=!allSelected&&someSelected;
+  updateDeleteSelectedButton();
+}
+
+/* ==========================================================
+   TOAST
+   ========================================================== */
+function showToast(msg){
+  const container=document.getElementById('toastContainer');
+  const toast=document.createElement('div');
+  toast.className='toast';
+  toast.textContent=msg;
+  container.appendChild(toast);
+  requestAnimationFrame(()=>toast.classList.add('show'));
+  setTimeout(()=>{
+    toast.classList.remove('show');
+    setTimeout(()=>toast.remove(),300);
+  },2800);
+}
+
+/* ==========================================================
+   CRUD ACTIONS
+   ========================================================== */
+function addPS(){
+  const data=getFormData('f');
+  if(!data.name){ alert('Full Name is required!'); return; }
+  data.id=generateId();
+  psData.push(data);
+  saveData();
+  syncIfEnabled();
+  fillForm('f',null);
+  switchTab('data');
+  showToast('PS data saved successfully');
+}
+function resetAddForm(){ fillForm('f',null); }
+
+function openEditModal(id){
+  const ps=psData.find(p=>p.id===id);
+  if(!ps) return;
+  editingId=id;
+  fillForm('e',ps);
+  document.getElementById('editModal').classList.add('visible');
+}
+function closeEditModal(){
+  document.getElementById('editModal').classList.remove('visible');
+  editingId=null;
+}
+function saveEdit(){
+  const data=getFormData('e');
+  if(!data.name){ alert('Full Name is required!'); return; }
+  const idx=psData.findIndex(p=>p.id===editingId);
+  if(idx===-1) return;
+  data.id=editingId;
+  psData[idx]=data;
+  saveData();
+  syncIfEnabled();
+  closeEditModal();
+  showToast('Changes saved successfully');
+  renderAll();
+}
+
+function deletePS(id){
+  const ps=psData.find(p=>p.id===id);
+  if(!ps) return;
+  if(!confirm(`Delete PS data for "${ps.name}"?`)) return;
+  psData=psData.filter(p=>p.id!==id);
+  selectedIds.delete(id);
+  saveData();
+  syncIfEnabled();
+  showToast('PS data deleted');
+  renderAll();
+}
+
+function openRescheduleModal(id){
+  const ps=psData.find(p=>p.id===id);
+  if(!ps) return;
+  rescheduleId=id;
+  document.getElementById('rescheduleName').textContent=ps.name+(ps.username?` (${ps.username})`:'');
+  const dateEl=document.getElementById('r-trialDate');
+  const timeEl=document.getElementById('r-trialTime');
+  dateEl.value='';
+  updateTimeSlotSelect(dateEl,timeEl,'');
+  dateEl.onchange=()=>updateTimeSlotSelect(dateEl,timeEl,'');
+  document.getElementById('rescheduleModal').classList.add('visible');
+}
+function closeRescheduleModal(){
+  document.getElementById('rescheduleModal').classList.remove('visible');
+  rescheduleId=null;
+}
+function saveReschedule(){
+  const date=document.getElementById('r-trialDate').value;
+  const time=document.getElementById('r-trialTime').value;
+  if(!date||!time){ alert('Please select a new date and time slot!'); return; }
+  const ps=psData.find(p=>p.id===rescheduleId);
+  if(!ps) return;
+  ps.trialDate=date;
+  ps.trialTime=time;
+  ps.status='Unreserved';
+  ps.followUp='Not Followed Up';
+  saveData();
+  syncIfEnabled();
+  closeRescheduleModal();
+  showToast('New schedule saved successfully');
+  renderAll();
+}
+
+/* ==========================================================
+   BULK SELECTION & DELETE
+   ========================================================== */
+function updateDeleteSelectedButton(){
+  const btn=document.getElementById('deleteSelectedBtn');
+  const count=selectedIds.size;
+  btn.textContent=count>0?`🗑 Delete Selected (${count})`:'🗑 Delete Selected';
+}
+function toggleSelectAll(checked){
+  const data=getFilteredData();
+  data.forEach(ps=>{ if(checked) selectedIds.add(ps.id); else selectedIds.delete(ps.id); });
+  renderTable();
+}
+function toggleRowSelection(id,checked){
+  if(checked) selectedIds.add(id);
+  else selectedIds.delete(id);
+  renderTable();
+}
+function deleteSelected(){
+  if(selectedIds.size===0){ alert('No data selected. Please check the PS data you want to delete first.'); return; }
+  const count=selectedIds.size;
+  if(!confirm(`Delete ${count} selected PS record(s)?\n\nThis action cannot be undone${settings.sheetSyncUrl&&settings.autoSync?', and will also update Google Sheets if auto-sync is enabled.':'.'}`)){ return; }
+  psData=psData.filter(p=>!selectedIds.has(p.id));
+  selectedIds.clear();
+  saveData();
+  syncIfEnabled();
+  renderAll();
+  showToast(`${count} PS record(s) deleted`);
+}
+
+/* ==========================================================
+   EXPORT
+   ========================================================== */
+function buildExportRows(){
+  return psData.map(ps=>({
+    'Trial Class Date':ps.trialDate||'',
+    'Trial Class Time':ps.trialTime||'',
+    'Status':ps.status||'',
+    'Follow Up':ps.followUp||'',
+    'Type':ps.type||'',
+    'Username':ps.username||'',
+    'Name':ps.name||'',
+    'Email':ps.email||'',
+    'Phone Number':ps.phone||'',
+    'Age':ps.age||'',
+    'Domicile':ps.domicile||'',
+    'Occupation':ps.occupation||'',
+    'Place of Occupation':ps.placeOfOccupation||'',
+    'Note':ps.note||''
+  }));
+}
+function todayFileStr(){
+  const d=new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+}
+function exportXLSX(){
+  if(psData.length===0){ alert('No data to export.'); return; }
+  const ws=XLSX.utils.json_to_sheet(buildExportRows());
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'PS Data');
+  XLSX.writeFile(wb,`lead_ps_${todayFileStr()}.xlsx`);
+  markExported();
+  showToast('Exported to Excel successfully','success');
+}
+function exportCSV(){
+  if(psData.length===0){ alert('No data to export.'); return; }
+  const ws=XLSX.utils.json_to_sheet(buildExportRows());
+  const csv=XLSX.utils.sheet_to_csv(ws);
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`lead_ps_${todayFileStr()}.csv`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+/* ==========================================================
+   IMPORT (CSV / XLSX)
+   ========================================================== */
+
+// Column name aliases (Indonesian / old names → internal key)
+const COL_ALIASES = {
+  'trial class date':'trialDate','trial date':'trialDate','tanggal trial':'trialDate',
+  'trial class time':'trialTime','trial time':'trialTime','waktu trial':'trialTime',
+  'status':'status',
+  'follow up':'followUp','followup':'followUp','follow-up':'followUp',
+  'type':'type','tipe':'type',
+  'username':'username',
+  'name':'name','nama':'name','full name':'name',
+  'email':'email',
+  'phone number':'phone','phone':'phone','no hp':'phone','no. hp':'phone','kontak':'phone','contact':'phone',
+  'age':'age','umur':'age','usia':'age',
+  'domicile':'domicile','domisili':'domicile',
+  'occupation':'occupation','pekerjaan':'occupation',
+  'place of occupation':'placeOfOccupation','institution':'placeOfOccupation','instansi':'placeOfOccupation','workplace':'placeOfOccupation',
+  'note':'note','notes':'note','keterangan':'note'
+};
+
+// State for import preview
+let importRows = [];   // parsed raw rows (objects with internal keys)
+let importSkip = [];   // booleans: true = duplicate, skip
+
+function setImportStatus(text, kind){
+  const el = document.getElementById('importStatus');
+  if(!el) return;
+  el.textContent = text;
+  el.className = 'sync-status ' + (kind||'idle');
+}
+
+function normaliseHeader(h){
+  return String(h||'').trim().toLowerCase().replace(/\s+/g,' ');
+}
+
+function normaliseDateValue(val){
+  if(!val && val !== 0) return '';
+  if(val instanceof Date){
+    if(isNaN(val.getTime())) return '';
+    return `${val.getUTCFullYear()}-${pad2(val.getUTCMonth()+1)}-${pad2(val.getUTCDate())}`;
+  }
+  const s = String(val).trim();
+  if(!s) return '';
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+  const dmy = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+  if(dmy) return `${dmy[3]}-${pad2(dmy[2])}-${pad2(dmy[1])}`;
+  if(/^\d{4,6}$/.test(s)){
+    const serial = parseInt(s,10);
+    const excelEpoch = new Date(Date.UTC(1899,11,30));
+    const d = new Date(excelEpoch.getTime() + serial * 86400000);
+    if(!isNaN(d.getTime())) return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth()+1)}-${pad2(d.getUTCDate())}`;
+  }
+  const tried = new Date(s.replace(/\s.*$/,'') + 'T12:00:00Z');
+  if(!isNaN(tried.getTime())) return `${tried.getUTCFullYear()}-${pad2(tried.getUTCMonth()+1)}-${pad2(tried.getUTCDate())}`;
+  return s;
+}
+
+function parseSheetRow(rawObj, headers){
+  const ps = {};
+  headers.forEach(h => {
+    const key = COL_ALIASES[normaliseHeader(h)];
+    if(!key) return;
+    const raw = rawObj[h];
+    if(key === 'trialDate'){
+      ps[key] = normaliseDateValue(raw);
+    } else {
+      ps[key] = String(raw||'').trim();
+    }
+  });
+  return ps;
+}
+
+function isDuplicate(ps){
+  // Duplicate = same name AND same trialDate
+  const name = (ps.name||'').toLowerCase().trim();
+  const date  = (ps.trialDate||'').trim();
+  if(!name) return false;
+  return psData.some(p =>
+    (p.name||'').toLowerCase().trim() === name &&
+    (p.trialDate||'').trim() === date
+  );
+}
+
+function handleImportFile(file){
+  if(!file) return;
+  if(file.size > 10*1024*1024){ setImportStatus('❌ File too large (max 10 MB).','error'); return; }
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!['xlsx','xls','csv'].includes(ext)){
+    setImportStatus('❌ Unsupported format. Use .xlsx, .xls, or .csv.','error'); return;
+  }
+
+  setImportStatus('⏳ Reading file...','idle');
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    try{
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array', cellDates:true, UTC:true});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(ws, {defval:'', raw:false, dateNF:'yyyy-mm-dd'});
+
+      if(!raw.length){ setImportStatus('❌ File is empty or has no data rows.','error'); return; }
+
+      const headers = Object.keys(raw[0]);
+      importRows = raw.map(r => parseSheetRow(r, headers));
+      importSkip = importRows.map(ps => isDuplicate(ps));
+
+      const newCount  = importSkip.filter(s=>!s).length;
+      const skipCount = importSkip.filter(s=>s).length;
+
+      renderImportPreview(newCount, skipCount);
+      setImportStatus('','idle');
+    }catch(err){
+      setImportStatus('❌ Failed to read file: ' + err.message,'error');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderImportPreview(newCount, skipCount){
+  const wrap = document.getElementById('importPreviewWrap');
+  const label = document.getElementById('importPreviewLabel');
+  const head  = document.getElementById('importPreviewHead');
+  const body  = document.getElementById('importPreviewBody');
+
+  label.textContent = `${newCount} new record(s) will be imported${skipCount ? ', ' + skipCount + ' duplicate(s) will be skipped' : ''}.`;
+
+  const cols = ['name','username','trialDate','trialTime','status','followUp','type','phone'];
+  const colLabels = {
+    name:'Name', username:'Username', trialDate:'Trial Date',
+    trialTime:'Time', status:'Status', followUp:'Follow Up',
+    type:'Type', phone:'Contact'
+  };
+
+  head.innerHTML = '<tr>' + cols.map(c=>`<th>${colLabels[c]}</th>`).join('') + '</tr>';
+  body.innerHTML = importRows.slice(0,50).map((ps,i) => {
+    const skip = importSkip[i];
+    const cells = cols.map(c=>`<td>${escapeHTML(ps[c]||'-')}</td>`).join('');
+    return `<tr class="${skip?'import-skip':''}">${cells}</tr>`;
+  }).join('');
+
+  if(importRows.length > 50){
+    const colCount = cols.length;
+    body.innerHTML += `<tr><td colspan="${colCount}" style="text-align:center;color:var(--ink-soft);font-size:12px;padding:10px;">… and ${importRows.length-50} more rows</td></tr>`;
+  }
+
+  wrap.hidden = false;
+}
+
+function confirmImport(){
+  const toAdd = importRows.filter((_,i) => !importSkip[i]);
+  if(!toAdd.length){ setImportStatus('⚠️ No new records to import.','idle'); return; }
+
+  toAdd.forEach(ps => {
+    // Migrate legacy status/followUp values just in case
+    if(LEGACY_STATUS_MAP[ps.status])   ps.status   = LEGACY_STATUS_MAP[ps.status];
+    if(LEGACY_FOLLOWUP_MAP[ps.followUp]) ps.followUp = LEGACY_FOLLOWUP_MAP[ps.followUp];
+    ps.id = generateId();
+    psData.push(ps);
+  });
+
+  saveData();
+  cancelImport();
+  setImportStatus(`✅ ${toAdd.length} record(s) imported successfully.`,'success');
+  showToast(`${toAdd.length} PS record(s) imported`);
+  renderAll();
+}
+
+function cancelImport(){
+  importRows = [];
+  importSkip = [];
+  document.getElementById('importPreviewWrap').hidden = true;
+  document.getElementById('importFileInput').value = '';
+  const dz = document.getElementById('importDropzone');
+  if(dz) dz.classList.remove('drag-over');
+}
+
+function syncIfEnabled(){
+  if(settings.sheetSyncUrl && settings.autoSync){
+    pushToSheets(true);
+  }
+}
+
+/* ==========================================================
+   GOOGLE SHEETS SYNC
+   ========================================================== */
+function getSyncUrl(){ return (settings.sheetSyncUrl||'').trim(); }
+
+function setSyncStatus(msg, kind){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  el.textContent = msg;
+  el.className = 'sync-status ' + (kind||'idle');
+}
+
+function updateSyncUI(){
+  const url = getSyncUrl();
+  const inp = document.getElementById('syncUrlInput');
+  const autoChk = document.getElementById('autoSyncCheck');
+  const lastEl = document.getElementById('lastSyncLabel');
+  if(inp) inp.value = url;
+  if(autoChk) autoChk.checked = !!settings.autoSync;
+  if(lastEl){
+    if(settings.lastSync){
+      const d = new Date(settings.lastSync);
+      lastEl.textContent = 'Last sync: ' + d.getDate() + ' ' + MONTHS_SHORT_EN[d.getMonth()] + ' ' + d.getFullYear()
+        + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+    } else {
+      lastEl.textContent = 'Last sync: never';
+    }
+  }
+}
+
+async function pingSheets(){
+  const url = getSyncUrl();
+  if(!url){ setSyncStatus('Paste URL Apps Script kamu dulu.','error'); return; }
+  setSyncStatus('Menguji koneksi...','idle');
+  try{
+    const res = await fetch(url + '?action=ping');
+    const json = await res.json();
+    if(json.ok){ setSyncStatus('Terhubung! Google Sheets bisa diakses.','success'); }
+    else { setSyncStatus('Error: ' + json.message,'error'); }
+  }catch(e){
+    setSyncStatus('Tidak bisa menjangkau script. Cek URL atau re-deploy.','error');
+  }
+}
+
+async function pushToSheets(silent){
+  const url = getSyncUrl();
+  if(!url){
+    if(!silent) setSyncStatus('Paste URL Apps Script kamu dulu.','error');
+    return;
+  }
+  if(!silent) setSyncStatus('Menyimpan ke Google Sheets...','idle');
+  try{
+    const res = await fetch(url, {
+      method:'POST',
+      body: JSON.stringify({ action:'write', data: psData }),
+    });
+    const json = await res.json();
+    if(json.ok){
+      settings.lastSync = Date.now();
+      saveSettings();
+      updateSyncUI();
+      if(!silent){ setSyncStatus(json.message,'success'); showToast('Data tersimpan ke Google Sheets!'); }
+    } else {
+      if(!silent) setSyncStatus('Error: ' + json.message,'error');
+    }
+  }catch(e){
+    if(!silent) setSyncStatus('Gagal: ' + e.message,'error');
+  }
+}
+
+// Merge data dari Sheets ke lokal — prioritas Sheets untuk record yang sama (by id)
+// Record lokal yang tidak ada di Sheets tetap dipertahankan
+function mergeFromSheets(sheetsData){
+  const sheetsMap = {};
+  sheetsData.forEach(r => { if(r.id) sheetsMap[r.id] = r; });
+
+  // Update / tambah record dari Sheets
+  const merged = sheetsData.map(r => {
+    if(!r.id) r.id = generateId();
+    return r;
+  });
+
+  // Pertahankan record lokal yang tidak ada di Sheets (belum sempat push)
+  psData.forEach(local => {
+    if(!sheetsMap[local.id]) merged.push(local);
+  });
+
+  return migrateLegacyData(merged);
+}
+
+async function pullFromSheets(){
+  const url = getSyncUrl();
+  if(!url){ setSyncStatus('Paste URL Apps Script kamu dulu.','error'); return; }
+  if(!confirm('Tarik & merge data dari Google Sheets?\n\nData dari Sheets akan digabung dengan data lokal. Record yang sama (ID sama) akan diperbarui dari Sheets.')) return;
+  setSyncStatus('Memuat dari Google Sheets...','idle');
+  try{
+    const res = await fetch(url + '?action=read');
+    const json = await res.json();
+    if(!json.ok){ setSyncStatus('Error: ' + json.message,'error'); return; }
+    const raw = json.data || [];
+    if(!raw.length){
+      setSyncStatus('Sheets kosong — tidak ada data yang ditarik.','idle');
+      return;
+    }
+    psData = mergeFromSheets(raw);
+    saveData();
+    settings.lastSync = Date.now();
+    saveSettings();
+    updateSyncUI();
+    setSyncStatus(psData.length + ' data berhasil dimuat dari Google Sheets.','success');
+    showToast('Data dimuat dari Google Sheets!');
+    renderAll();
+  }catch(e){
+    setSyncStatus('Gagal: ' + e.message,'error');
+  }
+}
+
+// Auto-pull saat buka website — silent, tidak ganggu user
+async function autoPullOnLoad(){
+  const url = getSyncUrl();
+  if(!url || !settings.autoSync) return;
+
+  // Tampilkan banner kecil di topbar
+  const banner = document.getElementById('syncLoadingBanner');
+  if(banner) banner.hidden = false;
+
+  try{
+    const res = await fetch(url + '?action=read');
+    const json = await res.json();
+    if(!json.ok || !json.data || !json.data.length){
+      if(banner) banner.hidden = true;
+      return;
+    }
+    const before = psData.length;
+    psData = mergeFromSheets(json.data);
+    saveData();
+    settings.lastSync = Date.now();
+    saveSettings();
+    updateSyncUI();
+    renderAll();
+
+    const added = psData.length - before;
+    if(added > 0){
+      showToast('Auto-sync: ' + added + ' data baru dari Sheets ditambahkan!');
+    } else {
+      showToast('Auto-sync: data sudah up to date.');
+    }
+  }catch(e){
+    // Gagal konek → diam saja, pakai data lokal
+  } finally {
+    if(banner) banner.hidden = true;
+  }
+}
+
+/* ==========================================================
+   NAVIGATION
+   ========================================================== */
+function switchTab(tab){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('pageTitle').textContent=TAB_INFO[tab].title;
+  document.getElementById('pageSubtitle').textContent=TAB_INFO[tab].subtitle;
+  renderAll();
+}
+function updateTopbarDate(){
+  const d=new Date();
+  document.getElementById('topbarDate').textContent=
+    `${DAYS_EN[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT_EN[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+/* ==========================================================
+   INIT
+   ========================================================== */
+function populateFilterOptions(){
+  const statusSel=document.getElementById('filterStatus');
+  STATUS_OPTIONS.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; statusSel.appendChild(o); });
+  const fuSel=document.getElementById('filterFollowUp');
+  FOLLOWUP_OPTIONS.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; fuSel.appendChild(o); });
+  const typeSel=document.getElementById('filterType');
+  TYPE_OPTIONS.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; typeSel.appendChild(o); });
+}
+
+/* ==========================================================
+   NOTES
+   ========================================================== */
+const NOTES_KEY = 'lead_manager_notes_v1';
+let notesData = [];
+
+function loadNotes(){
+  try{ notesData = JSON.parse(localStorage.getItem(NOTES_KEY)) || []; }
+  catch(e){ notesData = []; }
+}
+function saveNotes(){
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notesData));
+}
+function generateNoteId(){
+  return 'note_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+function noteDateLabel(ts){
+  const d = new Date(ts);
+  return `${d.getDate()} ${MONTHS_SHORT_EN[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function addNote(){
+  const note = {
+    id: generateNoteId(),
+    label: '',
+    body: '',
+    wide: false,
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  notesData.unshift(note);
+  saveNotes();
+  renderNotes();
+  // Auto-focus the new note's label
+  requestAnimationFrame(()=>{
+    const el = document.querySelector(`.note-card[data-note-id="${note.id}"] .note-label`);
+    if(el){ el.focus(); }
+  });
+}
+
+function deleteNote(id){
+  if(!confirm('Delete this note?')) return;
+  notesData = notesData.filter(n => n.id !== id);
+  saveNotes();
+  renderNotes();
+}
+
+function toggleWide(id){
+  const note = notesData.find(n => n.id === id);
+  if(!note) return;
+  note.wide = !note.wide;
+  saveNotes();
+  renderNotes();
+  // Re-focus body if was editing
+  requestAnimationFrame(()=>{
+    const el = document.querySelector(`.note-card[data-note-id="${id}"] .note-body`);
+    if(el) el.focus();
+  });
+}
+
+function onNoteInput(id, field, value){
+  const note = notesData.find(n => n.id === id);
+  if(!note) return;
+  note[field] = value;
+  note.updatedAt = Date.now();
+  saveNotes();
+}
+
+function filterNotes(){
+  const q = (document.getElementById('notesSearch').value || '').toLowerCase().trim();
+  const cards = document.querySelectorAll('.note-card[data-note-id]');
+  let visible = 0;
+  cards.forEach(card => {
+    const id = card.dataset.noteId;
+    const note = notesData.find(n => n.id === id);
+    if(!note) return;
+    const match = !q ||
+      (note.label||'').toLowerCase().includes(q) ||
+      (note.body||'').toLowerCase().includes(q);
+    card.classList.toggle('hidden-note', !match);
+    if(match) visible++;
+  });
+  const empty = document.getElementById('notesEmpty');
+  if(empty) empty.hidden = (notesData.length === 0 ? false : visible > 0);
+}
+
+function renderNotes(){
+  const grid = document.getElementById('notesGrid');
+  const empty = document.getElementById('notesEmpty');
+  if(!grid) return;
+
+  if(notesData.length === 0){
+    grid.innerHTML = '';
+    if(empty) empty.hidden = false;
+    return;
+  }
+  if(empty) empty.hidden = true;
+
+  grid.innerHTML = notesData.map(note => {
+    const id = escapeHTML(note.id);
+    const wideClass = note.wide ? ' wide' : '';
+    return `<div class="note-card${wideClass}" data-note-id="${id}">
+      <div class="note-pin"></div>
+      <input
+        class="note-label"
+        type="text"
+        maxlength="40"
+        placeholder="Label..."
+        value="${escapeHTML(note.label||'')}"
+        oninput="onNoteInput('${id}','label',this.value)"
+      >
+      <textarea
+        class="note-body"
+        placeholder="Write anything here..."
+        oninput="onNoteInput('${id}','body',this.value)"
+      >${escapeHTML(note.body||'')}</textarea>
+      <div class="note-footer">
+        <span class="note-date">${noteDateLabel(note.updatedAt||note.createdAt)}</span>
+        <div class="note-controls">
+          <button class="note-wide-btn" onclick="toggleWide('${id}')">${note.wide ? '↔ Narrow' : '↔ Wide'}</button>
+          <button class="note-del-btn" onclick="deleteNote('${id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Apply current search filter without re-rendering
+  filterNotes();
+}
+
+/* ==========================================================
+   WA TEMPLATES
+   ========================================================== */
+const WA_TEMPLATES_KEY = 'lead_manager_wa_templates_v1';
+
+const WA_TEMPLATE_DEFAULTS = [
+  { id:'ask_schedule',  label:'Tanya Jadwal',       body:'Halo kak {nama}! Aku mau tanya, kak maunya jadwal trial class-nya kapan ya? 😊' },
+  { id:'confirm',       label:'Konfirmasi Booking',  body:'Halo kak {nama}! Sudah aku booking ya untuk trial class tanggal {tanggal} jam {waktu} 🎉 Ditunggu kehadirannya kak!' },
+  { id:'followup_h3',  label:'Follow Up H-3',        body:'Halo kak {nama}! Mau konfirmasi nih, kak masih bisa join trial class tanggal {tanggal} jam {waktu} kan? 😊' },
+  { id:'followup_h1',  label:'Follow Up H-1',        body:'Reminder kak {nama}! Besok ada trial class jam {waktu} ya kak. Sampai jumpa besok! 🙌' },
+  { id:'day_of',       label:'Hari H',               body:'Halo kak {nama}! Hari ini trial class jam {waktu} ya kak. Ditunggu! 🎯' },
+  { id:'thankyou',     label:'Thank You H+1',        body:'Halo kak {nama}! Makasih banget sudah join trial class kemarin ya 🙏 谢谢! Gimana kesannya kak? Boleh dong cerita pengalamannya 😊' },
+];
+
+let waTemplates = [];
+
+function loadWaTemplates(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(WA_TEMPLATES_KEY));
+    if(raw && raw.length){
+      // Merge: keep user edits, add any new defaults not yet in storage
+      waTemplates = WA_TEMPLATE_DEFAULTS.map(def => {
+        const saved = raw.find(t => t.id === def.id);
+        return saved ? {...def, body: saved.body, label: saved.label} : {...def};
+      });
+    } else {
+      waTemplates = WA_TEMPLATE_DEFAULTS.map(t => ({...t}));
+    }
+  }catch(e){
+    waTemplates = WA_TEMPLATE_DEFAULTS.map(t => ({...t}));
+  }
+}
+
+function saveWaTemplates(){
+  localStorage.setItem(WA_TEMPLATES_KEY, JSON.stringify(waTemplates));
+}
+
+function fillTemplate(body, ps){
+  return body
+    .replace(/\{nama\}/gi,    ps.name     || '')
+    .replace(/\{tanggal\}/gi, ps.trialDate ? formatDateShort(ps.trialDate) : '')
+    .replace(/\{waktu\}/gi,   ps.trialTime || '');
+}
+
+function renderWaTemplatesSettings(){
+  const container = document.getElementById('waTemplatesContainer');
+  if(!container) return;
+
+  const items = waTemplates.map((t,i) => `
+    <div class="wa-template-block" style="position:relative;border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;background:#FAFAF8;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:11px;font-weight:800;color:var(--ink-soft);white-space:nowrap;">#${i+1}</span>
+        <input
+          type="text"
+          value="${escapeHTML(t.label)}"
+          style="flex:1;border:none;border-bottom:1px dashed var(--border);background:transparent;font:inherit;font-size:12px;font-weight:700;color:var(--ink);outline:none;cursor:text;padding:3px 4px;border-radius:0;"
+          onchange="waTemplates[${i}].label=this.value;saveWaTemplates();"
+          oninput="waTemplates[${i}].label=this.value;saveWaTemplates();"
+          placeholder="Nama template..."
+        >
+        <button
+          onclick="deleteWaTemplate(${i})"
+          style="background:var(--danger-bg);border:1px solid var(--danger);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--danger);cursor:pointer;white-space:nowrap;font-family:inherit;"
+          title="Hapus template ini"
+        >🗑 Hapus</button>
+      </div>
+      <textarea
+        class="wa-template-textarea"
+        placeholder="Tulis pesan di sini. Gunakan {nama}, {tanggal}, {waktu}..."
+        oninput="waTemplates[${i}].body=this.value;saveWaTemplates();"
+      >${escapeHTML(t.body)}</textarea>
+      <div style="margin-top:6px;font-size:11px;color:var(--ink-soft);">
+        💡 Placeholder: <code>{nama}</code> <code>{tanggal}</code> <code>{waktu}</code>
+      </div>
+    </div>
+  `).join('');
+
+  const addBtn = `<button
+    class="btn btn-secondary"
+    onclick="addWaTemplate()"
+    style="width:100%;margin-top:4px;border-style:dashed;"
+  >＋ Tambah Template Baru</button>`;
+
+  container.innerHTML = items + addBtn;
+}
+
+function addWaTemplate(){
+  waTemplates.push({ id: 'tpl_'+Date.now(), label: 'Template Baru', body: '' });
+  saveWaTemplates();
+  renderWaTemplatesSettings();
+  // focus the new label
+  requestAnimationFrame(()=>{
+    const inputs = document.querySelectorAll('#waTemplatesContainer input[type="text"]');
+    if(inputs.length){
+      const last = inputs[inputs.length-1];
+      last.focus();
+      last.select();
+      last.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+  showToast('Template baru ditambahkan!');
+}
+
+function deleteWaTemplate(i){
+  if(waTemplates.length <= 1){ showToast('Minimal harus ada 1 template'); return; }
+  if(!confirm('Hapus template "' + waTemplates[i].label + '"?')) return;
+  waTemplates.splice(i, 1);
+  saveWaTemplates();
+  renderWaTemplatesSettings();
+  showToast('Template dihapus');
+}
+
+function openWaModal(psId){ openWaDropdown(event.currentTarget, psId); }
+
+// ---- Dropdown state ----
+let _activeDropdownMenu = null;
+let _activeDropdownBtn  = null;
+
+function openWaDropdown(btnEl, psId){
+  // If clicking the same button again → close and return
+  if(_activeDropdownBtn === btnEl){
+    closeAllDropdowns();
+    return;
+  }
+  closeAllDropdowns();
+
+  const ps = psData.find(p => p.id === psId);
+  if(!ps) return;
+
+  // Build menu
+  const menu = document.createElement('div');
+  menu.className = 'wa-dropdown-menu open';
+  menu.setAttribute('data-dropdown', 'wa');
+
+  if(!waTemplates.length){
+    menu.innerHTML = '<div class="wa-dropdown-empty">Belum ada template.<br>Tambah di tab Import &amp; Export → WA Message Templates.</div>';
+  } else {
+    const encodedPsId = encodeURIComponent(psId);
+    menu.innerHTML =
+      '<div class="wa-dropdown-header">📋 Template untuk ' + escapeHTML(ps.name||'PS') + '</div>' +
+      waTemplates.map(function(t, i){
+        const filled  = fillTemplate(t.body, ps);
+        const preview = filled.replace(/\n/g,' ').slice(0,60) + (filled.length > 60 ? '…' : '');
+        const pillId  = 'wapill-' + i + '-' + escapeHTML(psId);
+        return '<div class="wa-dropdown-item" onclick="copyWaDropdownItem(' + i + ',\'' + escapeHTML(psId) + '\',\'' + pillId + '\')">'
+          + '<div class="wa-dropdown-item-copy">'
+          + '<div style="min-width:0;">'
+          + '<div class="wa-dropdown-item-label">' + escapeHTML(t.label) + '</div>'
+          + '<div class="wa-dropdown-item-preview">' + escapeHTML(preview) + '</div>'
+          + '</div>'
+          + '<span class="wa-copy-pill" id="' + pillId + '">Copy</span>'
+          + '</div></div>';
+      }).join('');
+  }
+
+  // Position relative to the button
+  document.body.appendChild(menu);
+  const rect = btnEl.getBoundingClientRect();
+  const scrollY = window.scrollY || document.documentElement.scrollTop;
+  const scrollX = window.scrollX || document.documentElement.scrollLeft;
+
+  menu.style.position = 'fixed';
+  menu.style.top  = (rect.bottom + 6) + 'px';
+  menu.style.left = rect.left + 'px';
+
+  // Keep it on screen horizontally
+  requestAnimationFrame(function(){
+    const mw = menu.offsetWidth;
+    const vw = window.innerWidth;
+    const left = rect.left;
+    if(left + mw > vw - 8){
+      menu.style.left = Math.max(8, vw - mw - 8) + 'px';
+    }
+    // Keep on screen vertically
+    const mh = menu.offsetHeight;
+    const vh = window.innerHeight;
+    if(rect.bottom + 6 + mh > vh - 8 && rect.top - mh - 6 > 8){
+      menu.style.top = (rect.top - mh - 6) + 'px';
+    }
+  });
+
+  _activeDropdownMenu = menu;
+  _activeDropdownBtn  = btnEl;
+
+  setTimeout(function(){
+    document.addEventListener('click', _dropdownOutside, true);
+    document.addEventListener('keydown', _dropdownKey);
+  }, 0);
+}
+
+function _dropdownOutside(e){
+  if(_activeDropdownMenu && !_activeDropdownMenu.contains(e.target) && e.target !== _activeDropdownBtn){
+    closeAllDropdowns();
+  }
+}
+
+function _dropdownKey(e){
+  if(e.key === 'Escape') closeAllDropdowns();
+}
+
+function closeAllDropdowns(){
+  document.removeEventListener('click', _dropdownOutside, true);
+  document.removeEventListener('keydown', _dropdownKey);
+  if(_activeDropdownMenu){
+    _activeDropdownMenu.remove();
+    _activeDropdownMenu = null;
+  }
+  _activeDropdownBtn = null;
+  // Safety: remove any stragglers
+  document.querySelectorAll('[data-dropdown="wa"]').forEach(function(m){ m.remove(); });
+}
+
+function copyWaDropdownItem(idx, psId, pillId){
+  const ps = psData.find(function(p){ return p.id === psId; });
+  if(!ps) return;
+  const t = waTemplates[idx];
+  if(!t) return;
+  const text = fillTemplate(t.body, ps);
+  const pill = document.getElementById(pillId);
+  copyText(text, function(){
+    if(pill){ pill.textContent = '✅ Copied!'; pill.classList.add('copied'); }
+    showToast('Template "' + t.label + '" disalin!');
+    setTimeout(function(){
+      if(pill){ pill.textContent = 'Copy'; pill.classList.remove('copied'); }
+    }, 1800);
+  });
+}
+
+function copyText(text, onSuccess){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(onSuccess).catch(function(){
+      fallbackCopy(text, onSuccess);
+    });
+  } else { fallbackCopy(text, onSuccess); }
+}
+
+function fallbackCopy(text, onSuccess){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.cssText='position:fixed;opacity:0;top:0;left:0;';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand('copy'); onSuccess(); } catch(e){}
+  document.body.removeChild(ta);
+}
+
+function copyWaTemplate(btn, text){
+  const txt = text.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+  copyText(txt, function(){
+    btn.textContent='✅ Copied!'; btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent='📋 Copy'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+function closeWaModal(){ closeAllDropdowns(); }
+
+// Close dropdown when scrolling (so it doesn't float away)
+window.addEventListener('scroll', function(){ closeAllDropdowns(); }, true);
+
+
+/* ==========================================================
+   STARTUP REMINDER MODAL
+   ========================================================== */
+function checkStartupReminders(){
+  const reminders = computeReminders();
+  const urgent = reminders.filter(r => !isReminderChecked(r));
+  if(urgent.length === 0) return;
+
+  const body = document.getElementById('startupModalBody');
+  const shown = urgent.slice(0, 8); // cap at 8 to keep modal short
+  body.innerHTML = `
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">
+      You have <strong>${urgent.length}</strong> pending reminder${urgent.length>1?'s':''} for today:
+    </p>
+    ${shown.map(r=>`
+      <div class="startup-reminder-item">
+        <span class="startup-tag ${r.type}">${escapeHTML(r.tag)}</span>
+        <div>
+          <div class="startup-name">${escapeHTML(r.ps.name||'(No name)')}</div>
+          <div class="startup-msg">${escapeHTML(r.message)}</div>
+        </div>
+      </div>
+    `).join('')}
+    ${urgent.length>8?`<p style="font-size:12px;color:var(--ink-soft);margin-top:8px;">...and ${urgent.length-8} more. Go to Dashboard to see all.</p>`:''}
+  `;
+  document.getElementById('startupModal').classList.add('visible');
+}
+
+function closeStartupModal(){
+  document.getElementById('startupModal').classList.remove('visible');
+}
+
+/* ==========================================================
+   EXPORT REMINDER
+   ========================================================== */
+const LAST_EXPORT_KEY = 'lead_manager_last_export_v1';
+const EXPORT_REMIND_DAYS = 7;
+
+function getLastExportTs(){
+  try{ return parseInt(localStorage.getItem(LAST_EXPORT_KEY))||0; }
+  catch(e){ return 0; }
+}
+function markExported(){
+  localStorage.setItem(LAST_EXPORT_KEY, Date.now().toString());
+  updateExportReminderUI();
+}
+function updateExportReminderUI(){
+  const banner = document.getElementById('exportReminderBanner');
+  const label  = document.getElementById('lastExportLabel');
+  if(!banner) return;
+  const last = getLastExportTs();
+  if(!last){
+    banner.hidden = false;
+    document.getElementById('exportDaysAgo').textContent = 'many';
+    if(label) label.textContent = 'Last export: never';
+    return;
+  }
+  const daysSince = Math.floor((Date.now()-last)/(1000*60*60*24));
+  if(label){
+    const d = new Date(last);
+    label.textContent = `Last export: ${d.getDate()} ${MONTHS_SHORT_EN[d.getMonth()]} ${d.getFullYear()}`;
+  }
+  if(daysSince >= EXPORT_REMIND_DAYS){
+    banner.hidden = false;
+    document.getElementById('exportDaysAgo').textContent = daysSince;
+  } else {
+    banner.hidden = true;
+  }
+}
+
+/* ==========================================================
+   NAVIGATE TO PS ROW
+   ========================================================== */
+function gotoPS(psId){
+  // 1. Switch to Data tab
+  switchTab('data');
+
+  // 2. Clear all filters so the row is visible
+  document.getElementById('filterSearch').value='';
+  document.getElementById('filterStatus').value='';
+  document.getElementById('filterFollowUp').value='';
+  document.getElementById('filterType').value='';
+  document.getElementById('filterDateFrom').value='';
+  document.getElementById('filterDateTo').value='';
+  sortState={col:null,dir:null};
+
+  // 3. Render fresh table
+  renderTable();
+
+  // 4. Find the row and highlight + scroll to it
+  requestAnimationFrame(()=>{
+    // rows have data-id attribute set during renderTable
+    const row=document.querySelector(`#psTableBody tr[data-id="${CSS.escape(psId)}"]`);
+    if(!row) return;
+    // Remove previous highlights
+    document.querySelectorAll('#psTableBody tr.row-highlight').forEach(r=>r.classList.remove('row-highlight'));
+    row.classList.add('row-highlight');
+    row.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+}
+
+function scrollTable(dir){
+  const wrapper=document.getElementById('psTableWrapper');
+  if(!wrapper) return;
+  wrapper.scrollBy({left: dir * 320, behavior:'smooth'});
+}
+
+function init(){
+  // Build forms
+  document.getElementById('addFormContainer').innerHTML=buildFormHTML('f');
+  document.getElementById('editFormContainer').innerHTML=buildFormHTML('e');
+  fillForm('f',null);
+
+  // Nav
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('click',()=>switchTab(item.dataset.tab));
+  });
+
+  // Add form actions
+  document.getElementById('saveAddBtn').addEventListener('click',addPS);
+  document.getElementById('resetAddBtn').addEventListener('click',resetAddForm);
+
+  // Target banner
+  document.getElementById('saveTargetBtn').addEventListener('click',()=>{
+    const val=parseInt(document.getElementById('targetInput').value,10);
+    if(!val||val<1){ alert('Target must be a number greater than 0.'); return; }
+    settings.target=val; saveSettings();
+    showToast('Monthly target saved');
+    renderAll();
+  });
+
+  // Filters
+  populateFilterOptions();
+  ['filterSearch','filterStatus','filterFollowUp','filterType','filterDateFrom','filterDateTo'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',renderTable);
+    document.getElementById(id).addEventListener('change',renderTable);
+  });
+  document.getElementById('clearDateFilterBtn').addEventListener('click',()=>{
+    document.getElementById('filterDateFrom').value='';
+    document.getElementById('filterDateTo').value='';
+    renderTable();
+  });
+  document.getElementById('resetFilterBtn').addEventListener('click',()=>{
+    document.getElementById('filterSearch').value='';
+    document.getElementById('filterStatus').value='';
+    document.getElementById('filterFollowUp').value='';
+    document.getElementById('filterType').value='';
+    document.getElementById('filterDateFrom').value='';
+    document.getElementById('filterDateTo').value='';
+    sortState={col:null,dir:null};
+    renderTable();
+  });
+  document.getElementById('deleteSelectedBtn').addEventListener('click',deleteSelected);
+  document.getElementById('selectAllCheckbox').addEventListener('change',(e)=>{
+    toggleSelectAll(e.target.checked);
+  });
+
+  // Sort headers
+  document.querySelectorAll('th.sortable').forEach(th=>{
+    th.addEventListener('click',()=>{
+      const col=th.dataset.col;
+      if(sortState.col===col){
+        if(sortState.dir==='asc') sortState.dir='desc';
+        else if(sortState.dir==='desc'){ sortState.col=null; sortState.dir=null; }
+      }else{
+        sortState.col=col;
+        sortState.dir='asc';
+      }
+      renderTable();
+    });
+  });
+
+  // Table actions (delegated)
+  document.getElementById('psTableBody').addEventListener('click',(e)=>{
+    const checkbox=e.target.closest('.row-checkbox');
+    if(checkbox){ toggleRowSelection(checkbox.dataset.id,checkbox.checked); return; }
+    const btn=e.target.closest('[data-action]');
+    if(!btn) return;
+    const id=btn.dataset.id;
+    if(btn.dataset.action==='edit') openEditModal(id);
+    else if(btn.dataset.action==='delete') deletePS(id);
+    else if(btn.dataset.action==='reschedule') openRescheduleModal(id);
+  });
+
+  // Edit modal
+  document.getElementById('editModalClose').addEventListener('click',closeEditModal);
+  document.getElementById('editCancelBtn').addEventListener('click',closeEditModal);
+  document.getElementById('editSaveBtn').addEventListener('click',saveEdit);
+  document.getElementById('editModal').addEventListener('click',(e)=>{ if(e.target.id==='editModal') closeEditModal(); });
+
+  // Reschedule modal
+  document.getElementById('rescheduleModalClose').addEventListener('click',closeRescheduleModal);
+  document.getElementById('rescheduleCancelBtn').addEventListener('click',closeRescheduleModal);
+  document.getElementById('rescheduleSaveBtn').addEventListener('click',saveReschedule);
+  document.getElementById('rescheduleModal').addEventListener('click',(e)=>{ if(e.target.id==='rescheduleModal') closeRescheduleModal(); });
+
+  // Export
+  document.getElementById('exportXlsxBtn').addEventListener('click',exportXLSX);
+  document.getElementById('exportCsvBtn').addEventListener('click',exportCSV);
+
+  // Import — file input
+  const importFileInput = document.getElementById('importFileInput');
+  importFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(file) handleImportFile(file);
+  });
+
+  // Import — drag & drop
+  const dz = document.getElementById('importDropzone');
+  dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dz.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if(file) handleImportFile(file);
+  });
+
+  // Import — preview buttons
+  document.getElementById('importConfirmBtn').addEventListener('click', confirmImport);
+  document.getElementById('importCancelBtn').addEventListener('click', cancelImport);
+
+  // Month navigation
+  document.getElementById('prevMonthBtn').addEventListener('click',()=>{
+    dashMonth.month--;
+    if(dashMonth.month<0){ dashMonth.month=11; dashMonth.year--; }
+    renderAll();
+  });
+  document.getElementById('nextMonthBtn').addEventListener('click',()=>{
+    dashMonth.month++;
+    if(dashMonth.month>11){ dashMonth.month=0; dashMonth.year++; }
+    renderAll();
+  });
+  document.getElementById('todayMonthBtn').addEventListener('click',()=>{
+    const n=new Date();
+    dashMonth={year:n.getFullYear(),month:n.getMonth()};
+    renderAll();
+  });
+
+  // WA Templates
+  loadWaTemplates();
+  renderWaTemplatesSettings();
+  document.getElementById('waModalClose').addEventListener('click', closeWaModal);
+  document.getElementById('waModalCloseBtn').addEventListener('click', closeWaModal);
+  document.getElementById('waModal').addEventListener('click', e=>{ if(e.target===document.getElementById('waModal')) closeWaModal(); });
+
+  // Startup reminder modal
+  document.getElementById('startupModalClose').addEventListener('click', closeStartupModal);
+  document.getElementById('startupDismissBtn').addEventListener('click', closeStartupModal);
+  document.getElementById('startupViewBtn').addEventListener('click', ()=>{ closeStartupModal(); switchTab('dashboard'); });
+
+  // Export reminder
+  updateExportReminderUI();
+
+  // Sheets sync UI
+  updateSyncUI();
+  // Pre-fill URL if already saved in settings
+  const syncInp = document.getElementById('syncUrlInput');
+  if(syncInp && settings.sheetSyncUrl) syncInp.value = settings.sheetSyncUrl;
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    const tag = document.activeElement.tagName.toLowerCase();
+    const isTyping = ['input','textarea','select'].includes(tag);
+    if(isTyping) return;
+    if(e.key === 'n' || e.key === 'N'){ e.preventDefault(); switchTab('tambah'); }
+  });
+
+  // Notes
+  loadNotes();
+  document.getElementById('addNoteBtn').addEventListener('click', addNote);
+  document.getElementById('notesSearch').addEventListener('input', filterNotes);
+
+  loadCheckedReminders();
+  updateTopbarDate();
+  renderAll();
+  // Check startup reminders after a small delay (feels natural)
+  setTimeout(checkStartupReminders, 600);
+  // Auto-pull dari Sheets saat buka website (jika auto-sync aktif)
+  setTimeout(autoPullOnLoad, 1200);
+}
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
