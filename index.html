@@ -1352,10 +1352,10 @@ function computeReminders(){
       reminders.push({type:'warning',tag:'Follow Up H-1',message:`Trial tomorrow: ${formatDateShort(ps.trialDate)}, ${ps.trialTime} — send reminder`,ps});
     }
     if(isSameDate(trialDate,today)){
-      reminders.push({type:'info',tag:'Trial Class Today',message:`Trial time: ${ps.trialTime}`,ps});
+      reminders.push({type:'info',tag:'Trial Class Today',message:`${formatDateShort(ps.trialDate)}, ${ps.trialTime}`,ps});
     }
     if(isSameDate(trialDate,yesterday)&&ps.status==='Attended'){
-      reminders.push({type:'info',tag:'Follow Up H+1',message:'Say thank you (谢谢) & ask for a testimonial from PS',ps});
+      reminders.push({type:'info',tag:'Follow Up H+1',message:`Trial kemarin: ${formatDateShort(ps.trialDate)} — kirim thank you & minta testimoni`,ps});
     }
   });
 
@@ -2226,7 +2226,7 @@ function updateSyncUI(){
   if(lastEl){
     if(settings.lastSync){
       const d = new Date(settings.lastSync);
-      lastEl.textContent = 'Last sync: ' + d.getDate() + ' ' + MONTHS_SHORT_EN[d.getMonth()] + ' ' + d.getFullYear()
+      lastEl.textContent = 'Last sync: ' + DAYS_ID[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS_SHORT_EN[d.getMonth()] + ' ' + d.getFullYear()
         + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
     } else {
       lastEl.textContent = 'Last sync: never';
@@ -2373,7 +2373,7 @@ function switchTab(tab){
 function updateTopbarDate(){
   const d=new Date();
   document.getElementById('topbarDate').textContent=
-    `${DAYS_EN[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT_EN[d.getMonth()]} ${d.getFullYear()}`;
+    `${DAYS_ID[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT_EN[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 /* ==========================================================
@@ -2406,7 +2406,7 @@ function generateNoteId(){
 }
 function noteDateLabel(ts){
   const d = new Date(ts);
-  return `${d.getDate()} ${MONTHS_SHORT_EN[d.getMonth()]} ${d.getFullYear()}`;
+  return `${DAYS_ID[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT_EN[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 function addNote(){
@@ -2837,7 +2837,7 @@ function updateExportReminderUI(){
   const daysSince = Math.floor((Date.now()-last)/(1000*60*60*24));
   if(label){
     const d = new Date(last);
-    label.textContent = `Last export: ${d.getDate()} ${MONTHS_SHORT_EN[d.getMonth()]} ${d.getFullYear()}`;
+    label.textContent = `Last export: ${DAYS_ID[d.getDay()]}, ${d.getDate()} ${MONTHS_SHORT_EN[d.getMonth()]} ${d.getFullYear()}`;
   }
   if(daysSince >= EXPORT_REMIND_DAYS){
     banner.hidden = false;
