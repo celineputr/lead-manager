@@ -584,6 +584,9 @@ tr.row-highlight td{
   display:none;
   animation:dropIn .12s ease;
 }
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
 @keyframes dropIn{
   from{opacity:0;transform:translateY(-6px);}
   to{opacity:1;transform:translateY(0);}
@@ -661,7 +664,13 @@ tr.row-highlight td{
         <h1 id="pageTitle">Dashboard</h1>
         <p id="pageSubtitle">Performance summary &amp; today's reminders</p>
       </div>
-      <div class="topbar-date" id="topbarDate"></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="syncLoadingBanner" hidden style="font-size:12px;font-weight:600;color:var(--success);display:flex;align-items:center;gap:6px;white-space:nowrap;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;border:2px solid var(--success);border-top-color:transparent;animation:spin .7s linear infinite;"></span>
+          Syncing...
+        </div>
+        <div class="topbar-date" id="topbarDate"></div>
+      </div>
     </header>
 
     <main class="content">
@@ -2250,10 +2259,30 @@ async function pushToSheets(silent){
   }
 }
 
+// Merge data dari Sheets ke lokal — prioritas Sheets untuk record yang sama (by id)
+// Record lokal yang tidak ada di Sheets tetap dipertahankan
+function mergeFromSheets(sheetsData){
+  const sheetsMap = {};
+  sheetsData.forEach(r => { if(r.id) sheetsMap[r.id] = r; });
+
+  // Update / tambah record dari Sheets
+  const merged = sheetsData.map(r => {
+    if(!r.id) r.id = generateId();
+    return r;
+  });
+
+  // Pertahankan record lokal yang tidak ada di Sheets (belum sempat push)
+  psData.forEach(local => {
+    if(!sheetsMap[local.id]) merged.push(local);
+  });
+
+  return migrateLegacyData(merged);
+}
+
 async function pullFromSheets(){
   const url = getSyncUrl();
   if(!url){ setSyncStatus('Paste URL Apps Script kamu dulu.','error'); return; }
-  if(!confirm('Tarik data dari Google Sheets?\n\nIni akan MENGGANTI semua data lokal dengan data dari Sheets. Data lokal yang belum di-push akan hilang.')) return;
+  if(!confirm('Tarik & merge data dari Google Sheets?\n\nData dari Sheets akan digabung dengan data lokal. Record yang sama (ID sama) akan diperbarui dari Sheets.')) return;
   setSyncStatus('Memuat dari Google Sheets...','idle');
   try{
     const res = await fetch(url + '?action=read');
@@ -2264,10 +2293,7 @@ async function pullFromSheets(){
       setSyncStatus('Sheets kosong — tidak ada data yang ditarik.','idle');
       return;
     }
-    psData = migrateLegacyData(raw.map(r => {
-      if(!r.id) r.id = generateId();
-      return r;
-    }));
+    psData = mergeFromSheets(raw);
     saveData();
     settings.lastSync = Date.now();
     saveSettings();
@@ -2277,6 +2303,43 @@ async function pullFromSheets(){
     renderAll();
   }catch(e){
     setSyncStatus('Gagal: ' + e.message,'error');
+  }
+}
+
+// Auto-pull saat buka website — silent, tidak ganggu user
+async function autoPullOnLoad(){
+  const url = getSyncUrl();
+  if(!url || !settings.autoSync) return;
+
+  // Tampilkan banner kecil di topbar
+  const banner = document.getElementById('syncLoadingBanner');
+  if(banner) banner.hidden = false;
+
+  try{
+    const res = await fetch(url + '?action=read');
+    const json = await res.json();
+    if(!json.ok || !json.data || !json.data.length){
+      if(banner) banner.hidden = true;
+      return;
+    }
+    const before = psData.length;
+    psData = mergeFromSheets(json.data);
+    saveData();
+    settings.lastSync = Date.now();
+    saveSettings();
+    updateSyncUI();
+    renderAll();
+
+    const added = psData.length - before;
+    if(added > 0){
+      showToast('Auto-sync: ' + added + ' data baru dari Sheets ditambahkan!');
+    } else {
+      showToast('Auto-sync: data sudah up to date.');
+    }
+  }catch(e){
+    // Gagal konek → diam saja, pakai data lokal
+  } finally {
+    if(banner) banner.hidden = true;
   }
 }
 
@@ -2976,6 +3039,8 @@ function init(){
   renderAll();
   // Check startup reminders after a small delay (feels natural)
   setTimeout(checkStartupReminders, 600);
+  // Auto-pull dari Sheets saat buka website (jika auto-sync aktif)
+  setTimeout(autoPullOnLoad, 1200);
 }
 
 document.addEventListener('DOMContentLoaded',init);
