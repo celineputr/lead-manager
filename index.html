@@ -187,6 +187,16 @@ button{font-family:inherit;}
 .btn-wa{background:#16A34A;color:#fff;}
 .btn-wa:hover{opacity:.88;}
 .btn-sm{padding:6px 13px;font-size:12px;}
+.btn-icon-disabled{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:var(--radius-sm);
+  font-size:15px;opacity:0.25;cursor:default;
+}
+.btn-icon-threads{
+  background:linear-gradient(135deg,#000 0%,#1a1a1a 100%);
+  border-radius:var(--radius-sm);
+}
+.btn-icon-threads:hover{opacity:0.8;}
 .btn-icon{
   display:inline-flex;align-items:center;justify-content:center;
   width:32px;height:32px;border-radius:7px;border:1px solid var(--border);
@@ -1114,9 +1124,10 @@ const FORM_SECTIONS = [
       {key:'username',  label:'Username (Social Media)', type:'text',   placeholder:'@username'},
       {key:'name',      label:'Full Name',               type:'text',   required:true},
       {key:'email',     label:'Email',                   type:'email'},
-      {key:'phone',     label:'Contact / WA Number',     type:'tel',    placeholder:'08xxxxxxxxxx'},
-      {key:'age',       label:'Age',                     type:'number', min:5, max:99},
-      {key:'domicile',  label:'Domicile',                type:'text'}
+      {key:'phone',      label:'Contact / WA Number',     type:'tel',    placeholder:'08xxxxxxxxxx'},
+      {key:'threadsUrl', label:'Threads Profile URL',      type:'url',    placeholder:'https://www.threads.net/@username'},
+      {key:'age',        label:'Age',                      type:'number', min:5, max:99},
+      {key:'domicile',   label:'Domicile',                 type:'text'}
     ]
   },
   {
@@ -1275,6 +1286,17 @@ function colorFor(kind,value){
   if(kind==='followUp') return FOLLOWUP_COLOR[value]||'gray';
   if(kind==='type')     return TYPE_COLOR[value]    ||'gray';
   return 'gray';
+}
+function threadsLink(url){
+  if(!url) return null;
+  url = String(url).trim();
+  if(!url) return null;
+  // If just a username like @celine or celine, convert to full URL
+  if(!url.startsWith('http')){
+    const handle = url.replace(/^@/,'');
+    return 'https://www.threads.net/@' + handle;
+  }
+  return url;
 }
 function waLink(phone){
   if(!phone) return null;
@@ -1548,6 +1570,7 @@ function renderReminderGrid(reminders){
       <div class="reminder-message">${escapeHTML(r.message)}</div>
       <div class="reminder-actions">
         ${wa?`<a class="btn btn-sm btn-wa" href="${wa}" target="_blank" rel="noopener">💬 WA</a>`:''}
+        ${threadsLink(ps.threadsUrl)?`<a class="btn btn-sm" style="background:#000;color:#fff;" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener">🧵 Threads</a>`:''}
         <button class="btn-goto" onclick="openWaDropdown(this,'${psId}')">📋 Templates</button>
         <button class="btn-goto" onclick="gotoPS('${psId}')">🔍 View</button>
         <button class="btn-edit-inline" onclick="openEditModal('${psId}')">✏️ Edit</button>
@@ -1656,6 +1679,7 @@ function renderNotFollowedUpList(){
       <td>
         <div class="action-cell">
           ${wa ? `<a class="btn btn-sm btn-wa" href="${wa}" target="_blank" rel="noopener">💬 WA</a>` : ''}
+          ${threadsLink(ps.threadsUrl)?`<a class="btn btn-sm" style="background:#000;color:#fff;" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener">🧵 Threads</a>`:''}
           <button class="btn-goto" onclick="openWaDropdown(this,'${psId}')">📋 Templates</button>
           <button class="btn-goto" onclick="gotoPS('${psId}')">🔍 View</button>
           <button class="btn-edit-inline" onclick="openEditModal('${psId}')">✏️ Edit</button>
@@ -1728,6 +1752,7 @@ function renderUnreservedList(){
       <td>
         <div class="action-cell">
           ${wa?`<a class="btn btn-sm btn-wa" href="${wa}" target="_blank" rel="noopener">💬 WA</a>`:''}
+          ${threadsLink(ps.threadsUrl)?`<a class="btn btn-sm" style="background:#000;color:#fff;" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener">🧵 Threads</a>`:''}
           <button class="btn-goto" onclick="openWaDropdown(this,'${psId}')">📋 Templates</button>
           <button class="btn-goto" onclick="gotoPS('${psId}')">🔍 View</button>
           <button class="btn-edit-inline" onclick="openEditModal('${psId}')">✏️ Edit</button>
@@ -1878,7 +1903,8 @@ function renderTable(){
       <td>${escapeHTML(ps.occupation||'-')}</td>
       <td>${escapeHTML(ps.placeOfOccupation||'-')}</td>
       <td class="action-cell">
-        ${wa?`<a class="btn-icon" href="${wa}" target="_blank" rel="noopener" title="Open WA">💬</a>`:''}
+        ${wa?`<a class="btn-icon" href="${wa}" target="_blank" rel="noopener" title="Chat WA">💬</a>`:'<span class="btn-icon btn-icon-disabled" title="No WA number">💬</span>'}
+        ${threadsLink(ps.threadsUrl)?`<a class="btn-icon btn-icon-threads" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener" title="Buka Threads">🧵</a>`:'<span class="btn-icon btn-icon-disabled" title="Threads belum diisi">🧵</span>'}
         <button class="btn-icon" title="WA Templates" onclick="openWaDropdown(this,'${ps.id}')">📋</button>
         ${ps.status==='Reschedule'?`<button class="btn-icon" title="Reschedule" data-action="reschedule" data-id="${ps.id}">🔄</button>`:''}
         <button class="btn-icon" title="Edit" data-action="edit" data-id="${ps.id}">✏️</button>
@@ -2045,6 +2071,7 @@ function buildExportRows(){
     'Name':ps.name||'',
     'Email':ps.email||'',
     'Phone Number':ps.phone||'',
+    'Threads URL':ps.threadsUrl||'',
     'Age':ps.age||'',
     'Domicile':ps.domicile||'',
     'Occupation':ps.occupation||'',
@@ -2089,6 +2116,7 @@ const COL_ALIASES = {
   'follow up':'followUp','followup':'followUp','follow-up':'followUp',
   'type':'type','tipe':'type',
   'username':'username',
+  'threads url':'threadsUrl','threads':'threadsUrl','threads profile':'threadsUrl',
   'name':'name','nama':'name','full name':'name',
   'email':'email',
   'phone number':'phone','phone':'phone','no hp':'phone','no. hp':'phone','kontak':'phone','contact':'phone',
