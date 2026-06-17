@@ -1283,8 +1283,20 @@ function waLink(phone){
   const num = digits.startsWith('0') ? digits.slice(1) : digits;
   return `https://wa.me/62${num}`;
 }
-function getTimeSlotOptions(dateStr){
+const OKTB_SLOTS = [
+  '08.30 – 09.30 WIB',
+  '09.30 – 10.30 WIB',
+  '10.30 – 11.30 WIB',
+  '13.30 – 14.30 WIB',
+  '16.30 – 17.30 WIB',
+  '17.30 – 18.30 WIB',
+  '19.00 – 20.00 WIB',
+];
+
+function getTimeSlotOptions(dateStr, type){
   if(!dateStr) return null;
+  if(type === 'OKTB') return OKTB_SLOTS;
+  // AMC slots (bergantung hari)
   const day = dateStrToDate(dateStr).getDay();
   if(day===0) return ['10.00 – 12.00 WIB','14.00 – 16.00 WIB'];
   return ['13.30 – 15.30 WIB','19.00 – 21.00 WIB'];
@@ -1316,8 +1328,12 @@ function buildFieldHTML(prefix,f){
   }
   return `<div class="form-row${f.full?' form-row-full':''}"><label for="${id}">${escapeHTML(f.label)}${f.required?' *':''}</label>${input}</div>`;
 }
-function updateTimeSlotSelect(dateEl,timeEl,currentValue){
-  const slots=getTimeSlotOptions(dateEl.value);
+function updateTimeSlotSelect(dateEl,timeEl,currentValue,forceType){
+  // Detect type field (prefix is 'f' for add form, 'e' for edit form)
+  const prefix = dateEl.id.split('-')[0];
+  const typeEl = document.getElementById(prefix+'-type');
+  const type = forceType || (typeEl ? typeEl.value : '');
+  const slots=getTimeSlotOptions(dateEl.value, type);
   timeEl.innerHTML='';
   if(!slots){
     const opt=document.createElement('option');
@@ -1348,8 +1364,10 @@ function fillForm(prefix,ps){
   }));
   const dateEl=document.getElementById(`${prefix}-trialDate`);
   const timeEl=document.getElementById(`${prefix}-trialTime`);
+  const typeEl=document.getElementById(`${prefix}-type`);
   updateTimeSlotSelect(dateEl,timeEl,ps?(ps.trialTime||''):'');
   dateEl.onchange=()=>updateTimeSlotSelect(dateEl,timeEl,'');
+  if(typeEl) typeEl.onchange=()=>updateTimeSlotSelect(dateEl,timeEl,'');
 }
 function getFormData(prefix){
   const data={};
@@ -1950,8 +1968,13 @@ function openRescheduleModal(id){
   if(!ps) return;
   rescheduleId=id;
   document.getElementById('rescheduleName').textContent=ps.name+(ps.username?` (${ps.username})`:'');
+  // Reschedule: try to get type from the PS being rescheduled
+  const resc_psId=document.getElementById('rescheduleModal').dataset.psId;
+  const resc_ps=resc_psId?psData.find(p=>p.id===resc_psId):null;
   const dateEl=document.getElementById('r-trialDate');
   const timeEl=document.getElementById('r-trialTime');
+  // Pre-set slots based on PS type
+  if(resc_ps&&resc_ps.trialDate) updateTimeSlotSelect(dateEl,timeEl,resc_ps.trialTime||'');
   dateEl.value='';
   updateTimeSlotSelect(dateEl,timeEl,'');
   dateEl.onchange=()=>updateTimeSlotSelect(dateEl,timeEl,'');
