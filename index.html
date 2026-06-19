@@ -591,16 +591,20 @@ tr.row-highlight td{
   background:var(--card);border:1px solid var(--border);
   border-radius:var(--radius);box-shadow:0 8px 28px rgba(0,0,0,.16);
   z-index:9999;padding:0;
-  display:none;
+  display:flex;
+  flex-direction:column;
   animation:dropIn .12s ease;
   overflow:hidden;
 }
+.wa-dropdown-menu:not(.open){display:none;}
 .wa-dropdown-scroll{
-  max-height:320px;
+  flex:1 1 auto;
+  min-height:0;
   overflow-y:auto;
   overscroll-behavior:contain;
   scrollbar-width:thin;
   scrollbar-color:var(--border) transparent;
+  -webkit-overflow-scrolling:touch;
 }
 .wa-dropdown-scroll::-webkit-scrollbar{width:5px;}
 .wa-dropdown-scroll::-webkit-scrollbar-track{background:transparent;}
@@ -612,7 +616,7 @@ tr.row-highlight td{
   from{opacity:0;transform:translateY(-6px);}
   to{opacity:1;transform:translateY(0);}
 }
-.wa-dropdown-menu.open{display:block;}
+.wa-dropdown-menu.open{display:flex;}
 .wa-dropdown-header{
   font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
   color:var(--ink-soft);padding:8px 14px 5px;
@@ -2804,19 +2808,34 @@ function openWaDropdown(btnEl, psId){
   menu.style.top  = (rect.bottom + 6) + 'px';
   menu.style.left = rect.left + 'px';
 
-  // Keep it on screen horizontally
+  // Keep it on screen horizontally + vertically
   requestAnimationFrame(function(){
     const mw = menu.offsetWidth;
     const vw = window.innerWidth;
+    const vh = window.innerHeight;
     const left = rect.left;
     if(left + mw > vw - 8){
       menu.style.left = Math.max(8, vw - mw - 8) + 'px';
     }
-    // Keep on screen vertically
-    const mh = menu.offsetHeight;
-    const vh = window.innerHeight;
-    if(rect.bottom + 6 + mh > vh - 8 && rect.top - mh - 6 > 8){
-      menu.style.top = (rect.top - mh - 6) + 'px';
+
+    const spaceBelow = vh - rect.bottom - 14; // 6px gap + 8px margin
+    const spaceAbove = rect.top - 14;
+    // Natural full height the menu WANTS (un-capped, measured via scrollHeight of inner content)
+    const scrollEl = menu.querySelector('.wa-dropdown-scroll');
+    const headerEl = menu.querySelector('.wa-dropdown-header');
+    const headerH = headerEl ? headerEl.offsetHeight : 0;
+    const naturalContentH = scrollEl ? scrollEl.scrollHeight : menu.scrollHeight;
+    const naturalTotalH = headerH + naturalContentH;
+
+    if(naturalTotalH <= spaceBelow || spaceBelow >= spaceAbove){
+      // Fits below (or below has more room than above) → position below button
+      menu.style.top = (rect.bottom + 6) + 'px';
+      menu.style.maxHeight = Math.min(naturalTotalH, spaceBelow, vh - 16) + 'px';
+    } else {
+      // Position above the button instead
+      const usedH = Math.min(naturalTotalH, spaceAbove, vh - 16);
+      menu.style.top = Math.max(8, rect.top - usedH - 6) + 'px';
+      menu.style.maxHeight = usedH + 'px';
     }
   });
 
