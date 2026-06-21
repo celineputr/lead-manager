@@ -2914,7 +2914,11 @@ function copyWaTemplate(btn, text){
 function closeWaModal(){ closeAllDropdowns(); }
 
 // Close dropdown when scrolling (so it doesn't float away)
-window.addEventListener('scroll', function(){ closeAllDropdowns(); }, true);
+// Close dropdown when scrolling the page (but NOT when scrolling inside the dropdown itself)
+window.addEventListener('scroll', function(e){
+  if(_activeDropdownMenu && _activeDropdownMenu.contains(e.target)) return;
+  closeAllDropdowns();
+}, true);
 
 
 /* ==========================================================
