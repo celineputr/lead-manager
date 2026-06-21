@@ -1130,7 +1130,7 @@ const FORM_SECTIONS = [
       {key:'name',      label:'Full Name',               type:'text',   required:true},
       {key:'email',     label:'Email',                   type:'email'},
       {key:'phone',      label:'Contact / WA Number',     type:'tel',    placeholder:'08xxxxxxxxxx'},
-      {key:'threadsUrl', label:'Threads Profile URL',      type:'url',    placeholder:'https://www.threads.net/@username'},
+      {key:'threadsUrl', label:'Threads Username',          type:'text',   placeholder:'cukup username, misal: celine_id'},
       {key:'age',        label:'Age',                      type:'number', min:5, max:99},
       {key:'domicile',   label:'Domicile',                 type:'text'}
     ]
@@ -1292,16 +1292,17 @@ function colorFor(kind,value){
   if(kind==='type')     return TYPE_COLOR[value]    ||'gray';
   return 'gray';
 }
-function threadsLink(url){
-  if(!url) return null;
-  url = String(url).trim();
-  if(!url) return null;
-  // If just a username like @celine or celine, convert to full URL
-  if(!url.startsWith('http')){
-    const handle = url.replace(/^@/,'');
-    return 'https://www.threads.net/@' + handle;
+function threadsLink(value){
+  if(!value) return null;
+  value = String(value).trim();
+  if(!value) return null;
+  // Already a full URL → use as-is (also fix old threads.net links to threads.com)
+  if(/^https?:\/\//i.test(value)){
+    return value.replace('threads.net', 'threads.com');
   }
-  return url;
+  // Otherwise treat as a username — strip @ and any accidental spaces
+  const handle = value.replace(/^@/, '').trim();
+  return 'https://www.threads.com/@' + handle;
 }
 function waLink(phone){
   if(!phone) return null;
