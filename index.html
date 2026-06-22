@@ -801,11 +801,11 @@ tr.row-highlight td{
               <tr>
                 <th class="checkbox-cell"><input type="checkbox" id="selectAllCheckbox" title="Select all"></th>
                 <th class="sortable" data-col="#">#<i class="sort-icon">↕</i></th>
+                <th>Actions</th>
                 <th class="sortable" data-col="status">Status<i class="sort-icon">↕</i></th>
                 <th class="sortable" data-col="followUp">Follow Up<i class="sort-icon">↕</i></th>
                 <th class="sortable" data-col="trialDate">Trial Schedule<i class="sort-icon">↕</i></th>
                 <th class="sortable" data-col="name">Name<i class="sort-icon">↕</i></th>
-                <th class="sortable" data-col="username">Username<i class="sort-icon">↕</i></th>
                 <th class="sortable" data-col="email">Email<i class="sort-icon">↕</i></th>
                 <th class="sortable" data-col="phone">Contact<i class="sort-icon">↕</i></th>
                 <th class="sortable" data-col="age">Age<i class="sort-icon">↕</i></th>
@@ -813,7 +813,7 @@ tr.row-highlight td{
                 <th class="sortable" data-col="domicile">Domicile<i class="sort-icon">↕</i></th>
                 <th class="sortable" data-col="occupation">Occupation<i class="sort-icon">↕</i></th>
                 <th class="sortable" data-col="placeOfOccupation">Institution<i class="sort-icon">↕</i></th>
-                <th>Actions</th>
+                <th class="sortable" data-col="note">Notes<i class="sort-icon">↕</i></th>
               </tr>
             </thead>
             <tbody id="psTableBody"></tbody>
@@ -1126,7 +1126,6 @@ const FORM_SECTIONS = [
     title:'👤 Personal Data',
     full:true,
     fields:[
-      {key:'username',  label:'Username (Social Media)', type:'text',   placeholder:'@username'},
       {key:'name',      label:'Full Name',               type:'text',   required:true},
       {key:'email',     label:'Email',                   type:'email'},
       {key:'phone',      label:'Contact / WA Number',     type:'tel',    placeholder:'08xxxxxxxxxx'},
@@ -1563,9 +1562,7 @@ function renderReminderGrid(reminders){
   function cardHTML(r, checked){
     const ps=r.ps;
     const wa=waLink(ps.phone);
-    const nameLine=ps.username
-      ?`${escapeHTML(ps.name)} <span class="reminder-username">(${escapeHTML(ps.username)})</span>`
-      :escapeHTML(ps.name||'(No name)');
+    const nameLine=escapeHTML(ps.name||'(No name)');
     const key=reminderKey(r);
     const psId=escapeHTML(ps.id);
     return `<div class="reminder-card ${r.type}${checked?' done-check':''}" data-rkey="${escapeHTML(key)}">
@@ -1677,7 +1674,7 @@ function renderNotFollowedUpList(){
 
     return `<tr>
       <td style="color:var(--ink-soft);font-size:12px;">${i+1}</td>
-      <td><strong>${escapeHTML(ps.name||'-')}</strong>${ps.username ? `<br><span style="color:var(--ink-soft);font-size:12px;">${escapeHTML(ps.username)}</span>` : ''}</td>
+      <td><strong>${escapeHTML(ps.name||'-')}</strong></td>
       <td>${trialCell}${urgency}</td>
       <td><span class="badge badge-${colorFor('status', ps.status)}">${escapeHTML(ps.status||'-')}</span></td>
       <td>${escapeHTML(ps.phone||'-')}</td>
@@ -1751,7 +1748,7 @@ function renderUnreservedList(){
     const psId=escapeHTML(ps.id);
     return `<tr>
       <td style="color:var(--ink-soft);font-size:12px;">${i+1}</td>
-      <td><strong>${escapeHTML(ps.name||'-')}</strong>${ps.username?`<br><span style="color:var(--ink-soft);font-size:12px;">${escapeHTML(ps.username)}</span>`:''}</td>
+      <td><strong>${escapeHTML(ps.name||'-')}</strong></td>
       <td>${trialCell}${urgency}</td>
       <td>${escapeHTML(ps.phone||'-')}</td>
       <td><span class="badge badge-${colorFor('type',ps.type)}">${escapeHTML(ps.type||'-')}</span></td>
@@ -1798,7 +1795,7 @@ function getFilteredData(){
 
   return psData.filter(ps=>{
     if(search){
-      const hay=`${ps.name||''} ${ps.username||''}`.toLowerCase();
+      const hay=`${ps.name||''} ${ps.threadsUrl||''}`.toLowerCase();
       if(!hay.includes(search)) return false;
     }
     if(status&&ps.status!==status) return false;
@@ -1896,11 +1893,17 @@ function renderTable(){
     return `<tr class="${rowClasses}" data-id="${ps.id}">
       <td class="checkbox-cell"><input type="checkbox" class="row-checkbox" data-id="${ps.id}" ${isSelected?'checked':''}></td>
       <td>${hasReminder?'🔴 ':''}${displayNum}</td>
+      <td class="action-cell">
+        ${wa?`<a class="btn-icon" href="${wa}" target="_blank" rel="noopener" title="Chat WA">💬</a>`:'<span class="btn-icon btn-icon-disabled" title="No WA number">💬</span>'}
+        ${threadsLink(ps.threadsUrl)?`<a class="btn-icon btn-icon-threads" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener" title="Buka Threads">🧵</a>`:'<span class="btn-icon btn-icon-disabled" title="Threads belum diisi">🧵</span>'}
+        <button class="btn-icon" title="WA Templates" onclick="openWaDropdown(this,'${ps.id}')">📋</button>
+        ${ps.status==='Reschedule'?`<button class="btn-icon" title="Reschedule" data-action="reschedule" data-id="${ps.id}">🔄</button>`:''}
+        <button class="btn-icon" title="Edit" data-action="edit" data-id="${ps.id}">✏️</button>
+      </td>
       <td><span class="badge badge-${colorFor('status',ps.status)}">${escapeHTML(ps.status)}</span></td>
       <td><span class="badge badge-${colorFor('followUp',ps.followUp)}">${escapeHTML(ps.followUp)}</span></td>
       <td>${trialInfo}</td>
       <td>${escapeHTML(ps.name)}</td>
-      <td>${escapeHTML(ps.username||'-')}</td>
       <td>${escapeHTML(ps.email||'-')}</td>
       <td>${escapeHTML(ps.phone||'-')}</td>
       <td>${escapeHTML(ps.age||'-')}</td>
@@ -1908,14 +1911,7 @@ function renderTable(){
       <td>${escapeHTML(ps.domicile||'-')}</td>
       <td>${escapeHTML(ps.occupation||'-')}</td>
       <td>${escapeHTML(ps.placeOfOccupation||'-')}</td>
-      <td class="action-cell">
-        ${wa?`<a class="btn-icon" href="${wa}" target="_blank" rel="noopener" title="Chat WA">💬</a>`:'<span class="btn-icon btn-icon-disabled" title="No WA number">💬</span>'}
-        ${threadsLink(ps.threadsUrl)?`<a class="btn-icon btn-icon-threads" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener" title="Buka Threads">🧵</a>`:'<span class="btn-icon btn-icon-disabled" title="Threads belum diisi">🧵</span>'}
-        <button class="btn-icon" title="WA Templates" onclick="openWaDropdown(this,'${ps.id}')">📋</button>
-        ${ps.status==='Reschedule'?`<button class="btn-icon" title="Reschedule" data-action="reschedule" data-id="${ps.id}">🔄</button>`:''}
-        <button class="btn-icon" title="Edit" data-action="edit" data-id="${ps.id}">✏️</button>
-        <button class="btn-icon" title="Delete" data-action="delete" data-id="${ps.id}">🗑</button>
-      </td>
+      <td style="max-width:180px;white-space:normal;font-size:12px;color:var(--ink-soft);">${escapeHTML(ps.note||'-')}</td>
     </tr>`;
   }).join('');
 
@@ -1999,7 +1995,7 @@ function openRescheduleModal(id){
   const ps=psData.find(p=>p.id===id);
   if(!ps) return;
   rescheduleId=id;
-  document.getElementById('rescheduleName').textContent=ps.name+(ps.username?` (${ps.username})`:'');
+  document.getElementById('rescheduleName').textContent=ps.name;
   // Reschedule: try to get type from the PS being rescheduled
   const resc_psId=document.getElementById('rescheduleModal').dataset.psId;
   const resc_ps=resc_psId?psData.find(p=>p.id===resc_psId):null;
@@ -2073,7 +2069,6 @@ function buildExportRows(){
     'Status':ps.status||'',
     'Follow Up':ps.followUp||'',
     'Type':ps.type||'',
-    'Username':ps.username||'',
     'Name':ps.name||'',
     'Email':ps.email||'',
     'Phone Number':ps.phone||'',
@@ -2121,7 +2116,6 @@ const COL_ALIASES = {
   'status':'status',
   'follow up':'followUp','followup':'followUp','follow-up':'followUp',
   'type':'type','tipe':'type',
-  'username':'username',
   'threads url':'threadsUrl','threads':'threadsUrl','threads profile':'threadsUrl',
   'name':'name','nama':'name','full name':'name',
   'email':'email',
