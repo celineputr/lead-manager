@@ -1573,7 +1573,7 @@ function renderReminderGrid(reminders){
       <div class="reminder-message">${escapeHTML(r.message)}</div>
       <div class="reminder-actions">
         ${wa?`<a class="btn btn-sm btn-wa" href="${wa}" target="_blank" rel="noopener">💬 WA</a>`:''}
-        ${threadsLink(ps.threadsUrl)?`<a class="btn btn-sm" style="background:#000;color:#fff;" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener">🧵 Threads</a>`:''}
+        ${threadsLink(ps.threadsUrl)?`<a class="btn btn-sm" style="background:#000;color:#fff;" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener">🧵 Threads</a>`:`<span class="btn btn-sm" style="opacity:0.3;cursor:default;background:#000;color:#fff;" title="Threads belum diisi">🧵 Threads</span>`}
         <button class="btn-goto" onclick="openWaDropdown(this,'${psId}')">📋 Templates</button>
         <button class="btn-goto" onclick="gotoPS('${psId}')">🔍 View</button>
         <button class="btn-edit-inline" onclick="openEditModal('${psId}')">✏️ Edit</button>
@@ -1682,7 +1682,7 @@ function renderNotFollowedUpList(){
       <td>
         <div class="action-cell">
           ${wa ? `<a class="btn btn-sm btn-wa" href="${wa}" target="_blank" rel="noopener">💬 WA</a>` : ''}
-          ${threadsLink(ps.threadsUrl)?`<a class="btn btn-sm" style="background:#000;color:#fff;" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener">🧵 Threads</a>`:''}
+          ${threadsLink(ps.threadsUrl)?`<a class="btn btn-sm" style="background:#000;color:#fff;" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener">🧵 Threads</a>`:`<span class="btn btn-sm" style="opacity:0.3;cursor:default;background:#000;color:#fff;" title="Threads belum diisi">🧵 Threads</span>`}
           <button class="btn-goto" onclick="openWaDropdown(this,'${psId}')">📋 Templates</button>
           <button class="btn-goto" onclick="gotoPS('${psId}')">🔍 View</button>
           <button class="btn-edit-inline" onclick="openEditModal('${psId}')">✏️ Edit</button>
@@ -1755,7 +1755,7 @@ function renderUnreservedList(){
       <td>
         <div class="action-cell">
           ${wa?`<a class="btn btn-sm btn-wa" href="${wa}" target="_blank" rel="noopener">💬 WA</a>`:''}
-          ${threadsLink(ps.threadsUrl)?`<a class="btn btn-sm" style="background:#000;color:#fff;" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener">🧵 Threads</a>`:''}
+          ${threadsLink(ps.threadsUrl)?`<a class="btn btn-sm" style="background:#000;color:#fff;" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener">🧵 Threads</a>`:`<span class="btn btn-sm" style="opacity:0.3;cursor:default;background:#000;color:#fff;" title="Threads belum diisi">🧵 Threads</span>`}
           <button class="btn-goto" onclick="openWaDropdown(this,'${psId}')">📋 Templates</button>
           <button class="btn-goto" onclick="gotoPS('${psId}')">🔍 View</button>
           <button class="btn-edit-inline" onclick="openEditModal('${psId}')">✏️ Edit</button>
