@@ -115,6 +115,12 @@ button{font-family:inherit;}
   border-left:4px solid var(--ink);border-radius:var(--radius-sm);
   padding:14px 16px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04);
 }
+.reminder-card.today{border-left-color:#7C3AED;background:#F5F3FF;}
+.reminder-card.h1{border-left-color:#DC2626;background:#FEF2F2;}
+.reminder-card.h3{border-left-color:#D97706;background:#FFFBEB;}
+.reminder-card.send-res{border-left-color:#2563EB;background:#EFF6FF;}
+.reminder-card.no-schedule{border-left-color:#6B7280;background:#F3F4F6;}
+.reminder-card.h-plus1{border-left-color:#16A34A;background:#F0FDF4;}
 .reminder-card.urgent{border-left-color:var(--danger);background:var(--danger-bg);}
 .reminder-card.warning{border-left-color:var(--warning);background:var(--warning-bg);}
 .reminder-card.info{border-left-color:var(--info);background:var(--info-bg);}
@@ -125,6 +131,12 @@ button{font-family:inherit;}
 .tag-urgent{background:var(--danger);}
 .tag-warning{background:var(--warning);}
 .tag-info{background:var(--info);}
+.tag-today{background:#7C3AED;}
+.tag-h1{background:#DC2626;}
+.tag-h3{background:#D97706;}
+.tag-send-res{background:#2563EB;}
+.tag-no-schedule{background:#6B7280;}
+.tag-h-plus1{background:#16A34A;}
 .reminder-name{font-weight:700;font-size:14px;margin-bottom:2px;}
 .reminder-username{color:var(--ink-soft);font-weight:500;font-size:13px;}
 .reminder-phone{font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
@@ -582,6 +594,12 @@ tr.row-highlight td{
 .startup-tag.urgent{background:var(--danger-bg);color:var(--danger);}
 .startup-tag.warning{background:var(--warning-bg);color:var(--warning);}
 .startup-tag.info{background:var(--info-bg);color:var(--info);}
+.startup-tag.today{background:#F5F3FF;color:#7C3AED;}
+.startup-tag.h1{background:#FEF2F2;color:#DC2626;}
+.startup-tag.h3{background:#FFFBEB;color:#D97706;}
+.startup-tag.send-res{background:#EFF6FF;color:#2563EB;}
+.startup-tag.no-schedule{background:#F3F4F6;color:#6B7280;}
+.startup-tag.h-plus1{background:#F0FDF4;color:#16A34A;}
 .startup-name{font-size:13px;font-weight:700;color:var(--ink);}
 .startup-msg{font-size:12px;color:var(--ink-soft);margin-top:2px;}
 
@@ -1420,29 +1438,29 @@ function computeReminders(){
 
   psData.forEach(ps=>{
     if(!ps.trialDate||!ps.trialTime){
-      reminders.push({type:'urgent',tag:'No Schedule Yet',message:'Send available schedule to PS via WA immediately',ps});
+      reminders.push({type:'no-schedule',tag:'No Schedule Yet',message:'Kirim jadwal yang tersedia ke PS via WA sekarang',ps});
       return;
     }
     const trialDate=dateStrToDate(ps.trialDate);
     if(ps.status==='Unreserved'&&trialDate>=today){
-      reminders.push({type:'urgent',tag:'Send Reservation at 10 AM',message:`Trial: ${formatDateShort(ps.trialDate)}, ${ps.trialTime}`,ps});
+      reminders.push({type:'send-res',tag:'Send Reservation at 10 AM',message:`Trial: ${formatDateShort(ps.trialDate)}, ${ps.trialTime}`,ps});
     }
     if(isSameDate(trialDate,dayPlus3)&&ps.status==='Reserved'){
-      reminders.push({type:'warning',tag:'Follow Up H-3',message:`Trial in 3 days: ${formatDateShort(ps.trialDate)}, ${ps.trialTime} — confirm attendance`,ps});
+      reminders.push({type:'h3',tag:'Follow Up H-3',message:`Trial in 3 days: ${formatDateShort(ps.trialDate)}, ${ps.trialTime} — konfirmasi kehadiran`,ps});
     }
     if(isSameDate(trialDate,tomorrow)&&ps.status==='Reserved'){
-      reminders.push({type:'warning',tag:'Follow Up H-1',message:`Trial tomorrow: ${formatDateShort(ps.trialDate)}, ${ps.trialTime} — send reminder`,ps});
+      reminders.push({type:'h1',tag:'Follow Up H-1',message:`Trial besok: ${formatDateShort(ps.trialDate)}, ${ps.trialTime} — kirim reminder`,ps});
     }
     if(isSameDate(trialDate,today)){
-      reminders.push({type:'info',tag:'Trial Class Today',message:`${formatDateShort(ps.trialDate)}, ${ps.trialTime}`,ps});
+      reminders.push({type:'today',tag:'Trial Class Today',message:`${formatDateShort(ps.trialDate)}, ${ps.trialTime}`,ps});
     }
     if(isSameDate(trialDate,yesterday)&&ps.status==='Attended'){
-      reminders.push({type:'info',tag:'Follow Up H+1',message:`Trial kemarin: ${formatDateShort(ps.trialDate)} — kirim thank you & minta testimoni`,ps});
+      reminders.push({type:'h-plus1',tag:'Follow Up H+1',message:`Trial kemarin: ${formatDateShort(ps.trialDate)} — kirim thank you & minta testimoni`,ps});
     }
   });
 
-  const order={urgent:0,warning:1,info:2};
-  reminders.sort((a,b)=>order[a.type]-order[b.type]);
+  const order={'today':0,'h1':1,'h3':2,'send-res':3,'no-schedule':4,'h-plus1':5};
+  reminders.sort((a,b)=>(order[a.type]??99)-(order[b.type]??99));
   return reminders;
 }
 
