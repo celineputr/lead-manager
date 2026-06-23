@@ -856,7 +856,8 @@ tr.row-highlight td{
 
           <!-- Action buttons -->
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <button class="btn btn-primary" onclick="pushToSheets(false)">⬆️ Push ke Sheets</button>
+            <button class="btn btn-primary" onclick="pushToSheets(false)">⬆️ Push Data PS</button>
+            <button class="btn btn-secondary" onclick="pushTemplatesToSheets(true)">⬆️ Push Templates</button>
             <button class="btn btn-secondary" onclick="pullFromSheets()">⬇️ Pull dari Sheets</button>
           </div>
 
@@ -2344,6 +2345,7 @@ async function pushToSheets(silent){
   try{
     const res = await fetch(url, {
       method:'POST',
+      headers:{'Content-Type':'text/plain'},
       body: JSON.stringify({ action:'write', data: psData }),
     });
     const json = await res.json();
@@ -2386,7 +2388,7 @@ async function pullFromSheets(){
   if(!confirm('Tarik & merge data dari Google Sheets?\n\nData dari Sheets akan digabung dengan data lokal. Record yang sama (ID sama) akan diperbarui dari Sheets.')) return;
   setSyncStatus('Memuat dari Google Sheets...','idle');
   try{
-    const res = await fetch(url + '?action=read');
+    const res = await fetch(url + '?action=read', { headers:{'Content-Type':'text/plain'} });
     const json = await res.json();
     if(!json.ok){ setSyncStatus('Error: ' + json.message,'error'); return; }
     const raw = json.data || [];
@@ -2417,7 +2419,7 @@ async function autoPullOnLoad(){
   if(banner) banner.hidden = false;
 
   try{
-    const res = await fetch(url + '?action=read');
+    const res = await fetch(url + '?action=read', { headers:{'Content-Type':'text/plain'} });
     const json = await res.json();
     if(!json.ok || !json.data || !json.data.length){
       if(banner) banner.hidden = true;
@@ -2432,6 +2434,10 @@ async function autoPullOnLoad(){
     renderAll();
 
     const added = psData.length - before;
+    // Pull templates juga
+    const templatePulled = await pullTemplatesFromSheets();
+    if(templatePulled) renderWaTemplatesSettings();
+
     if(added > 0){
       showToast('Auto-sync: ' + added + ' data baru dari Sheets ditambahkan!');
     } else {
@@ -2672,6 +2678,51 @@ function loadWaTemplates(){
 
 function saveWaTemplates(){
   localStorage.setItem(WA_TEMPLATES_KEY, JSON.stringify(waTemplates));
+  // Push ke Sheets juga (silent — tidak ganggu UI)
+  pushTemplatesToSheets();
+}
+
+async function pushTemplatesToSheets(manual){
+  const url = getSyncUrl();
+  if(!url) return;
+  try{
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'write_templates', templates: waTemplates }),
+    });
+    const json = await res.json();
+    if(manual){
+      if(json.ok) showToast('✅ ' + waTemplates.length + ' template tersimpan ke Sheets!');
+      else showToast('❌ Gagal: ' + json.message);
+    }
+  }catch(e){
+    if(manual) showToast('❌ Gagal push template: ' + e.message);
+  }
+}
+
+async function pullTemplatesFromSheets(){
+  const url = getSyncUrl();
+  if(!url) return false;
+  try{
+    const res = await fetch(url + '?action=read_templates');
+    const json = await res.json();
+    if(!json.ok || !json.templates || !json.templates.length) return false;
+    // Merge: templates dari Sheets menang, tapi jangan hapus default yang tidak ada di Sheets
+    const sheetsMap = {};
+    json.templates.forEach(t => { if(t.id) sheetsMap[t.id] = t; });
+    // Gabung: semua dari Sheets + default yang belum ada di Sheets
+    const merged = json.templates.map(t => ({ ...t }));
+    WA_TEMPLATE_DEFAULTS.forEach(def => {
+      if(!sheetsMap[def.id]) merged.push({...def});
+    });
+    if(merged.length){
+      waTemplates = merged;
+      localStorage.setItem(WA_TEMPLATES_KEY, JSON.stringify(waTemplates));
+      return true;
+    }
+    return false;
+  }catch(e){ return false; }
 }
 
 function fillTemplate(body, ps){
