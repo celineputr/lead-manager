@@ -604,6 +604,13 @@ tr.row-highlight td{
 .startup-msg{font-size:12px;color:var(--ink-soft);margin-top:2px;}
 
 /* ---------- WA Dropdown ---------- */
+.multicheck-group{display:flex;flex-direction:column;gap:6px;padding:4px 0;}
+.multicheck-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);cursor:pointer;padding:5px 8px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--bg);transition:background .15s;}
+.multicheck-item:hover{background:#EFF6FF;}
+.multicheck-item input[type="checkbox"]{width:15px;height:15px;accent-color:var(--info);flex-shrink:0;cursor:pointer;}
+.multicheck-item span{flex:1;}
+.multicheck-item input:checked ~ span{font-weight:600;color:var(--info);}
+
 .wa-dropdown-menu{
   position:fixed;
   min-width:280px;max-width:360px;
@@ -1149,6 +1156,7 @@ const FORM_SECTIONS = [
       {key:'email',     label:'Email',                   type:'email'},
       {key:'phone',      label:'Contact / WA Number',     type:'tel',    placeholder:'08xxxxxxxxxx'},
       {key:'threadsUrl', label:'Threads Username',          type:'text',   placeholder:'cukup username, misal: celine_id'},
+      {key:'availability', label:'Availability (AMC)', type:'multicheck', full:true},
       {key:'age',        label:'Age',                      type:'number', min:5, max:99},
       {key:'domicile',   label:'Domicile',                 type:'text'}
     ]
@@ -1329,6 +1337,15 @@ function waLink(phone){
   const num = digits.startsWith('0') ? digits.slice(1) : digits;
   return `https://wa.me/62${num}`;
 }
+const AMC_AVAILABILITY_SLOTS = [
+  'Weekday 13.30 – 15.30 WIB',
+  'Weekday 19.00 – 21.00 WIB',
+  'Sabtu 13.30 – 15.30 WIB',
+  'Sabtu 19.00 – 21.00 WIB',
+  'Minggu 10.00 – 12.00 WIB',
+  'Minggu 14.00 – 16.00 WIB',
+];
+
 const OKTB_SLOTS = [
   '08.30 – 09.30 WIB',
   '09.30 – 10.30 WIB',
@@ -1367,6 +1384,13 @@ function buildFieldHTML(prefix,f){
     input=`<select id="${id}">${f.options.map(o=>`<option value="${escapeHTML(o)}">${escapeHTML(o)}</option>`).join('')}</select>`;
   }else if(f.type==='textarea'){
     input=`<textarea id="${id}" rows="3"></textarea>`;
+  }else if(f.type==='multicheck'){
+    input = '<div class="multicheck-group">' +
+      AMC_AVAILABILITY_SLOTS.map(slot => {
+        const sid = id + '-' + slot.replace(/[^a-z0-9]/gi,'_');
+        return `<label class="multicheck-item"><input type="checkbox" id="${sid}" value="${escapeHTML(slot)}"><span>${escapeHTML(slot)}</span></label>`;
+      }).join('') +
+      '</div>';
   }else if(f.type==='timeslot'){
     input=`<select id="${id}" disabled><option value="" disabled selected>— Select date first —</option></select>`;
   }else{
@@ -1399,6 +1423,15 @@ function updateTimeSlotSelect(dateEl,timeEl,currentValue,forceType){
 function fillForm(prefix,ps){
   FORM_SECTIONS.forEach(section=>section.fields.forEach(f=>{
     if(f.key==='trialTime') return;
+    if(f.type==='multicheck'){
+      const selected = ps && ps[f.key] ? (Array.isArray(ps[f.key]) ? ps[f.key] : ps[f.key].split('|')) : [];
+      AMC_AVAILABILITY_SLOTS.forEach(slot=>{
+        const sid = `${prefix}-${f.key}-` + slot.replace(/[^a-z0-9]/gi,'_');
+        const cb = document.getElementById(sid);
+        if(cb) cb.checked = selected.includes(slot);
+      });
+      return;
+    }
     const el=document.getElementById(`${prefix}-${f.key}`);
     if(!el) return;
     if(f.type==='select'){
@@ -1418,6 +1451,15 @@ function fillForm(prefix,ps){
 function getFormData(prefix){
   const data={};
   FORM_SECTIONS.forEach(section=>section.fields.forEach(f=>{
+    if(f.type==='multicheck'){
+      const checked = AMC_AVAILABILITY_SLOTS.filter(slot=>{
+        const sid = `${prefix}-${f.key}-` + slot.replace(/[^a-z0-9]/gi,'_');
+        const cb = document.getElementById(sid);
+        return cb && cb.checked;
+      });
+      data[f.key] = checked; // stored as array
+      return;
+    }
     const el=document.getElementById(`${prefix}-${f.key}`);
     data[f.key]=el?el.value.trim():'';
   }));
@@ -1693,7 +1735,9 @@ function renderNotFollowedUpList(){
 
     return `<tr>
       <td style="color:var(--ink-soft);font-size:12px;">${i+1}</td>
-      <td><strong>${escapeHTML(ps.name||'-')}</strong></td>
+      <td><strong>${escapeHTML(ps.name||'-')}</strong>
+        ${ps.availability && ps.availability.length ? `<div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:3px;">${(Array.isArray(ps.availability)?ps.availability:ps.availability.split('|')).map(s=>`<span style="font-size:10px;background:#EFF6FF;color:#2563EB;border-radius:4px;padding:1px 5px;white-space:nowrap;">${escapeHTML(s)}</span>`).join('')}</div>` : ''}
+      </td>
       <td>${trialCell}${urgency}</td>
       <td><span class="badge badge-${colorFor('status', ps.status)}">${escapeHTML(ps.status||'-')}</span></td>
       <td>${escapeHTML(ps.phone||'-')}</td>
@@ -1767,7 +1811,9 @@ function renderUnreservedList(){
     const psId=escapeHTML(ps.id);
     return `<tr>
       <td style="color:var(--ink-soft);font-size:12px;">${i+1}</td>
-      <td><strong>${escapeHTML(ps.name||'-')}</strong></td>
+      <td><strong>${escapeHTML(ps.name||'-')}</strong>
+        ${ps.availability && ps.availability.length ? `<div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:3px;">${(Array.isArray(ps.availability)?ps.availability:ps.availability.split('|')).map(s=>`<span style="font-size:10px;background:#EFF6FF;color:#2563EB;border-radius:4px;padding:1px 5px;white-space:nowrap;">${escapeHTML(s)}</span>`).join('')}</div>` : ''}
+      </td>
       <td>${trialCell}${urgency}</td>
       <td>${escapeHTML(ps.phone||'-')}</td>
       <td><span class="badge badge-${colorFor('type',ps.type)}">${escapeHTML(ps.type||'-')}</span></td>
@@ -1922,7 +1968,10 @@ function renderTable(){
       <td><span class="badge badge-${colorFor('status',ps.status)}">${escapeHTML(ps.status)}</span></td>
       <td><span class="badge badge-${colorFor('followUp',ps.followUp)}">${escapeHTML(ps.followUp)}</span></td>
       <td>${trialInfo}</td>
-      <td>${escapeHTML(ps.name)}</td>
+      <td>
+        ${escapeHTML(ps.name)}
+        ${ps.availability && ps.availability.length ? `<div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:3px;">${(Array.isArray(ps.availability)?ps.availability:ps.availability.split('|')).map(s=>`<span style="font-size:10px;background:#EFF6FF;color:#2563EB;border-radius:4px;padding:1px 5px;white-space:nowrap;">${escapeHTML(s)}</span>`).join('')}</div>` : ''}
+      </td>
       <td>${escapeHTML(ps.email||'-')}</td>
       <td>${escapeHTML(ps.phone||'-')}</td>
       <td>${escapeHTML(ps.age||'-')}</td>
@@ -2091,6 +2140,7 @@ function buildExportRows(){
     'Email':ps.email||'',
     'Phone Number':ps.phone||'',
     'Threads URL':ps.threadsUrl||'',
+    'Availability':(Array.isArray(ps.availability)?ps.availability:ps.availability?ps.availability.split('|'):[]).join(', '),
     'Age':ps.age||'',
     'Domicile':ps.domicile||'',
     'Occupation':ps.occupation||'',
