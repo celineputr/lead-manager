@@ -953,7 +953,7 @@ tr.row-highlight td{
         <div class="card" style="margin-bottom:16px;">
           <h3 style="font-size:15px;font-weight:800;margin-bottom:6px;">💬 WA Message Templates</h3>
           <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px;">
-            Edit templates below. Use <code>{nama}</code>, <code>{tanggal}</code>, <code>{waktu}</code> as placeholders — they'll be replaced with the PS's actual data when you copy.
+            Edit templates below. Use <code>{nama}</code>, <code>{tanggal}</code>, <code>{waktu}</code>, <code>{availability}</code> as placeholders — they'll be replaced with the PS's actual data when you copy.
           </p>
           <div id="waTemplatesContainer"></div>
         </div>
@@ -2723,6 +2723,7 @@ const WA_TEMPLATE_DEFAULTS = [
   { id:'followup_h1',  label:'Follow Up H-1',        body:'Reminder kak {nama}! Besok ada trial class jam {waktu} ya kak. Sampai jumpa besok! 🙌' },
   { id:'day_of',       label:'Hari H',               body:'Halo kak {nama}! Hari ini trial class jam {waktu} ya kak. Ditunggu! 🎯' },
   { id:'thankyou',     label:'Thank You H+1',        body:'Halo kak {nama}! Makasih banget sudah join trial class kemarin ya 🙏 谢谢! Gimana kesannya kak? Boleh dong cerita pengalamannya 😊' },
+  { id:'confirm_avail', label:'Konfirmasi Availability', body:'Aku mau make sure jadwal yang sudah kakak pilih. Berarti kakak available di {availability} ya? 😊 Kalau iya, aku segera bantu proses booking trial class-nya sekarang ya kak 🙏🏻✨' },
 ];
 
 let waTemplates = [];
@@ -2794,10 +2795,18 @@ async function pullTemplatesFromSheets(){
 }
 
 function fillTemplate(body, ps){
+  // Format availability: list ke bawah dengan nomor
+  let availStr = '';
+  if(ps.availability && ps.availability.length){
+    const slots = Array.isArray(ps.availability) ? ps.availability : ps.availability.split('|');
+    if(slots.length === 1) availStr = slots[0];
+    else availStr = slots.map((s,i) => (i+1) + '. ' + s).join('\n');
+  }
   return body
-    .replace(/\{nama\}/gi,    ps.name     || '')
-    .replace(/\{tanggal\}/gi, ps.trialDate ? formatDateShort(ps.trialDate) : '')
-    .replace(/\{waktu\}/gi,   ps.trialTime || '');
+    .replace(/\{nama\}/gi,         ps.name     || '')
+    .replace(/\{tanggal\}/gi,      ps.trialDate ? formatDateShort(ps.trialDate) : '')
+    .replace(/\{waktu\}/gi,        ps.trialTime || '')
+    .replace(/\{availability\}/gi, availStr || '(belum diisi)');
 }
 
 function renderWaTemplatesSettings(){
@@ -2824,11 +2833,11 @@ function renderWaTemplatesSettings(){
       </div>
       <textarea
         class="wa-template-textarea"
-        placeholder="Tulis pesan di sini. Gunakan {nama}, {tanggal}, {waktu}..."
+        placeholder="Tulis pesan di sini. Gunakan {nama}, {tanggal}, {waktu}, {availability}..."
         oninput="waTemplates[${i}].body=this.value;saveWaTemplates();"
       >${escapeHTML(t.body)}</textarea>
       <div style="margin-top:6px;font-size:11px;color:var(--ink-soft);">
-        💡 Placeholder: <code>{nama}</code> <code>{tanggal}</code> <code>{waktu}</code>
+        💡 Placeholder: <code>{nama}</code> <code>{tanggal}</code> <code>{waktu}</code> <code>{availability}</code>
       </div>
     </div>
   `).join('');
