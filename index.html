@@ -529,6 +529,12 @@ tr.row-highlight td{
 .note-card.wide .note-wide-btn{font-weight:700;color:var(--ink);}
 
 /* Delete button */
+.note-copy-btn{
+  background:none;border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:3px 8px;font-size:12px;color:var(--ink-soft);cursor:pointer;
+}
+.note-copy-btn:hover{background:var(--info-bg);color:var(--info);border-color:var(--info);}
+.note-copy-btn.copied{background:var(--success-bg);color:var(--success);border-color:var(--success);}
 .note-del-btn{
   background:none;border:1px solid var(--border);border-radius:6px;
   color:var(--ink-soft);font-size:11px;padding:3px 8px;cursor:pointer;
@@ -2690,6 +2696,22 @@ function renderNotes(){
 
     const controls = document.createElement('div');
     controls.className = 'note-controls';
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'note-copy-btn';
+    copyBtn.textContent = '📋';
+    copyBtn.title = 'Copy isi note';
+    copyBtn.addEventListener('click', function(){
+      const n = notesData.find(function(x){ return x.id === safeId; });
+      if(!n) return;
+      const text = (n.label ? n.label + '\n' : '') + (n.body || '');
+      copyText(text, function(){
+        copyBtn.textContent = '✅';
+        copyBtn.classList.add('copied');
+        setTimeout(function(){ copyBtn.textContent = '📋'; copyBtn.classList.remove('copied'); }, 1800);
+      });
+    });
+    controls.appendChild(copyBtn);
 
     const wideBtn = document.createElement('button');
     wideBtn.className = 'note-wide-btn';
