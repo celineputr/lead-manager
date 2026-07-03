@@ -1812,10 +1812,7 @@ function renderNotFollowedUpList(){
 
     return `<tr>
       <td style="color:var(--ink-soft);font-size:12px;">${i+1}</td>
-      <td><strong>${escapeHTML(ps.name||'-')}</strong>
-        ${ps.availability && ps.availability.length ? `<div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:3px;">${(Array.isArray(ps.availability)?ps.availability:ps.availability.split('|')).map(s=>`<span style="font-size:10px;background:#EFF6FF;color:#2563EB;border-radius:4px;padding:1px 5px;white-space:nowrap;">${escapeHTML(s)}</span>`).join('')}</div>` : ''}
-      </td>
-      <td>${trialCell}${urgency}</td>
+      <td><strong>${escapeHTML(ps.name||'-')}</strong></td>
       <td><span class="badge badge-${colorFor('status', ps.status)}">${escapeHTML(ps.status||'-')}</span></td>
       <td>${escapeHTML(ps.phone||'-')}</td>
       <td><span class="badge badge-${colorFor('type', ps.type)}">${escapeHTML(ps.type||'-')}</span></td>
@@ -1891,7 +1888,11 @@ function renderUnreservedList(){
       <td><strong>${escapeHTML(ps.name||'-')}</strong>
         ${ps.availability && ps.availability.length ? `<div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:3px;">${(Array.isArray(ps.availability)?ps.availability:ps.availability.split('|')).map(s=>`<span style="font-size:10px;background:#EFF6FF;color:#2563EB;border-radius:4px;padding:1px 5px;white-space:nowrap;">${escapeHTML(s)}</span>`).join('')}</div>` : ''}
       </td>
-      <td>${trialCell}${urgency}</td>
+      <td>
+        ${ps.availability && ps.availability.length
+          ? (Array.isArray(ps.availability)?ps.availability:ps.availability.split('|')).map(s=>`<span style="display:block;font-size:12px;background:#EFF6FF;color:#2563EB;border-radius:4px;padding:2px 7px;margin-bottom:3px;white-space:nowrap;">${escapeHTML(s)}</span>`).join('')
+          : '<span style="color:var(--ink-soft);font-size:12px;">Belum diisi</span>'}
+      </td>
       <td>${escapeHTML(ps.phone||'-')}</td>
       <td><span class="badge badge-${colorFor('type',ps.type)}">${escapeHTML(ps.type||'-')}</span></td>
       <td>
@@ -1912,8 +1913,8 @@ function renderUnreservedList(){
         <thead>
           <tr>
             <th>#</th>
-            <th>Name / Username</th>
-            <th>Trial Schedule</th>
+            <th>Name</th>
+            <th>Availability</th>
             <th>Contact</th>
             <th>Type</th>
             <th>Action</th>
