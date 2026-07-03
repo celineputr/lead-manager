@@ -115,6 +115,7 @@ button{font-family:inherit;}
   border-left:4px solid var(--ink);border-radius:var(--radius-sm);
   padding:14px 16px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04);
 }
+.reminder-card.war-kelas{border-left-color:#EA580C;background:#FFF7ED;}
 .reminder-card.today{border-left-color:#7C3AED;background:#F5F3FF;}
 .reminder-card.h1{border-left-color:#DC2626;background:#FEF2F2;}
 .reminder-card.h3{border-left-color:#D97706;background:#FFFBEB;}
@@ -131,6 +132,7 @@ button{font-family:inherit;}
 .tag-urgent{background:var(--danger);}
 .tag-warning{background:var(--warning);}
 .tag-info{background:var(--info);}
+.tag-war-kelas{background:#EA580C;}
 .tag-today{background:#7C3AED;}
 .tag-h1{background:#DC2626;}
 .tag-h3{background:#D97706;}
@@ -600,6 +602,7 @@ tr.row-highlight td{
 .startup-tag.urgent{background:var(--danger-bg);color:var(--danger);}
 .startup-tag.warning{background:var(--warning-bg);color:var(--warning);}
 .startup-tag.info{background:var(--info-bg);color:var(--info);}
+.startup-tag.war-kelas{background:#FFF7ED;color:#EA580C;}
 .startup-tag.today{background:#F5F3FF;color:#7C3AED;}
 .startup-tag.h1{background:#FEF2F2;color:#DC2626;}
 .startup-tag.h3{background:#FFFBEB;color:#D97706;}
@@ -608,6 +611,17 @@ tr.row-highlight td{
 .startup-tag.h-plus1{background:#F0FDF4;color:#16A34A;}
 .startup-name{font-size:13px;font-weight:700;color:var(--ink);}
 .startup-msg{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+
+/* ---------- Dashboard Sub-tabs ---------- */
+.dash-subtabs{display:flex;gap:0;border-bottom:1.5px solid var(--border);margin-bottom:16px;}
+.dash-subtab{background:none;border:none;border-bottom:2.5px solid transparent;padding:9px 16px;font-size:13px;font-weight:500;color:var(--ink-soft);cursor:pointer;margin-bottom:-1.5px;display:flex;align-items:center;gap:6px;font-family:inherit;}
+.dash-subtab:hover{color:var(--ink);}
+.dash-subtab.active{color:var(--ink);border-bottom-color:var(--ink);}
+.dash-subtab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;font-size:10px;font-weight:700;}
+.dash-subtab-badge.danger{background:var(--danger-bg);color:var(--danger);}
+.dash-subtab-badge.warning{background:var(--warning-bg);color:var(--warning);}
+.dash-subpanel{display:none;}
+.dash-subpanel.active{display:block;}
 
 /* ---------- WA Dropdown ---------- */
 .multicheck-group{display:flex;flex-direction:column;gap:6px;padding:4px 0;}
@@ -772,25 +786,39 @@ tr.row-highlight td{
           </div>
         </div>
 
-        <h2 class="section-title">⚠️ Reminders &amp; To-Do</h2>
-        <div class="reminder-grid" id="reminderGrid"></div>
-
-        <h2 class="section-title">📈 Statistics</h2>
-        <div class="stats-row">
-          <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total PS</div></div>
-          <div class="stat-card"><div class="stat-value stat-danger" id="statBelumWar">0</div><div class="stat-label">Unreserved</div></div>
-          <div class="stat-card"><div class="stat-value stat-success" id="statAttended">0</div><div class="stat-label">Attended</div></div>
-          <div class="stat-card"><div class="stat-value stat-orange" id="statHalf">0</div><div class="stat-label">Half</div></div>
-          <div class="stat-card"><div class="stat-value stat-gray" id="statAbsent">0</div><div class="stat-label">Absent</div></div>
-          <div class="stat-card"><div class="stat-value stat-info" id="statAMC">0</div><div class="stat-label">AMC</div></div>
-          <div class="stat-card"><div class="stat-value stat-purple" id="statOKTB">0</div><div class="stat-label">OKTB</div></div>
+        <!-- Sub-tabs -->
+        <div class="dash-subtabs">
+          <button class="dash-subtab active" data-subtab="overview">Overview</button>
+          <button class="dash-subtab" data-subtab="unreserved">Unreserved <span class="dash-subtab-badge danger" id="badgeUnreserved">0</span></button>
+          <button class="dash-subtab" data-subtab="notfollowed">Not Followed Up <span class="dash-subtab-badge warning" id="badgeNotFollowed">0</span></button>
         </div>
 
-        <h2 class="section-title">📣 Not Followed Up</h2>
-        <div id="notFollowedUpList"></div>
+        <!-- Sub-tab: Overview -->
+        <div class="dash-subpanel active" id="subpanel-overview">
+          <h2 class="section-title">⚠️ Reminders &amp; To-Do</h2>
+          <div class="reminder-grid" id="reminderGrid"></div>
 
-        <h2 class="section-title">🔔 Unreserved PS — Need Action</h2>
-        <div id="unreservedList"></div>
+          <h2 class="section-title">📈 Statistics</h2>
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total PS</div></div>
+            <div class="stat-card"><div class="stat-value stat-danger" id="statBelumWar">0</div><div class="stat-label">Unreserved</div></div>
+            <div class="stat-card"><div class="stat-value stat-success" id="statAttended">0</div><div class="stat-label">Attended</div></div>
+            <div class="stat-card"><div class="stat-value stat-orange" id="statHalf">0</div><div class="stat-label">Half</div></div>
+            <div class="stat-card"><div class="stat-value stat-gray" id="statAbsent">0</div><div class="stat-label">Absent</div></div>
+            <div class="stat-card"><div class="stat-value stat-info" id="statAMC">0</div><div class="stat-label">AMC</div></div>
+            <div class="stat-card"><div class="stat-value stat-purple" id="statOKTB">0</div><div class="stat-label">OKTB</div></div>
+          </div>
+        </div>
+
+        <!-- Sub-tab: Unreserved -->
+        <div class="dash-subpanel" id="subpanel-unreserved">
+          <div id="unreservedList"></div>
+        </div>
+
+        <!-- Sub-tab: Not Followed Up -->
+        <div class="dash-subpanel" id="subpanel-notfollowed">
+          <div id="notFollowedUpList"></div>
+        </div>
 
       </section>
 
@@ -1484,15 +1512,46 @@ function computeReminders(){
 
   const dayPlus3=new Date(today); dayPlus3.setDate(today.getDate()+3);
 
+  const todayDay = today.getDay(); // 0=Minggu,1=Sen,...,6=Sab
+  const isWeekday = todayDay >= 1 && todayDay <= 5;
+  const isSaturday = todayDay === 6;
+  const isSunday = todayDay === 0;
+
   psData.forEach(ps=>{
     if(!ps.trialDate||!ps.trialTime){
-      reminders.push({type:'no-schedule',tag:'No Schedule Yet',message:'Kirim jadwal yang tersedia ke PS via WA sekarang',ps});
+      // PS belum punya jadwal — cek availability untuk war kelas reminder
+      if(ps.status==='Unreserved' && ps.availability && ps.availability.length){
+        const slots = Array.isArray(ps.availability) ? ps.availability : ps.availability.split('|');
+        const wantWeekday = slots.some(s => s.toLowerCase().includes('weekday'));
+        const wantSabtu   = slots.some(s => s.toLowerCase().includes('sabtu'));
+        const wantMinggu  = slots.some(s => s.toLowerCase().includes('minggu'));
+        const shouldRemind = (wantWeekday && isWeekday) || (wantSabtu && isSaturday) || (wantMinggu && isSunday);
+        if(shouldRemind){
+          const slotList = slots.join(', ');
+          reminders.push({type:'war-kelas',tag:'⚔️ War Kelas Hari Ini!',message:`Availability: ${slotList} — segera war kelas untuk PS ini!`,ps});
+        }
+      } else {
+        reminders.push({type:'no-schedule',tag:'No Schedule Yet',message:'Kirim jadwal yang tersedia ke PS via WA sekarang',ps});
+      }
       return;
     }
     const trialDate=dateStrToDate(ps.trialDate);
-    if(ps.status==='Unreserved'&&trialDate>=today){
+
+    // War kelas reminder: PS unreserved, punya availability, belum ada trialDate yang di-war
+    if(ps.status==='Unreserved' && ps.availability && ps.availability.length){
+      const slots = Array.isArray(ps.availability) ? ps.availability : ps.availability.split('|');
+      const wantWeekday = slots.some(s => s.toLowerCase().includes('weekday'));
+      const wantSabtu   = slots.some(s => s.toLowerCase().includes('sabtu'));
+      const wantMinggu  = slots.some(s => s.toLowerCase().includes('minggu'));
+      const shouldRemind = (wantWeekday && isWeekday) || (wantSabtu && isSaturday) || (wantMinggu && isSunday);
+      if(shouldRemind){
+        const slotList = slots.join(', ');
+        reminders.push({type:'war-kelas',tag:'⚔️ War Kelas Hari Ini!',message:`Availability: ${slotList} — segera war kelas untuk PS ini!`,ps});
+      }
+    } else if(ps.status==='Unreserved'&&trialDate>=today){
       reminders.push({type:'send-res',tag:'Send Reservation at 10 AM',message:`Trial: ${formatDateShort(ps.trialDate)}, ${ps.trialTime}`,ps});
     }
+
     if(isSameDate(trialDate,dayPlus3)&&ps.status==='Reserved'){
       reminders.push({type:'h3',tag:'Follow Up H-3',message:`Trial in 3 days: ${formatDateShort(ps.trialDate)}, ${ps.trialTime} — konfirmasi kehadiran`,ps});
     }
@@ -1507,7 +1566,7 @@ function computeReminders(){
     }
   });
 
-  const order={'today':0,'h1':1,'h3':2,'send-res':3,'no-schedule':4,'h-plus1':5};
+  const order={'today':0,'h1':1,'h3':2,'war-kelas':3,'send-res':4,'no-schedule':5,'h-plus1':6};
   reminders.sort((a,b)=>(order[a.type]??99)-(order[b.type]??99));
   return reminders;
 }
@@ -1701,6 +1760,18 @@ function renderStats(){
 function renderCharts(){
   renderNotFollowedUpList();
   renderUnreservedList();
+  updateDashSubtabBadges();
+}
+
+function updateDashSubtabBadges(){
+  const today = getToday();
+  const unreservedCount = psData.filter(p => p.status === 'Unreserved').length;
+  const notFollowedCount = psData.filter(p => p.followUp === 'Not Followed Up' && p.trialDate).length;
+
+  const bu = document.getElementById('badgeUnreserved');
+  const bn = document.getElementById('badgeNotFollowed');
+  if(bu) { bu.textContent = unreservedCount; bu.hidden = unreservedCount === 0; }
+  if(bn) { bn.textContent = notFollowedCount; bn.hidden = notFollowedCount === 0; }
 }
 
 function renderNotFollowedUpList(){
@@ -3181,6 +3252,17 @@ function init(){
   // Nav
   document.querySelectorAll('.nav-item').forEach(item=>{
     item.addEventListener('click',()=>switchTab(item.dataset.tab));
+  });
+
+  // Dashboard sub-tabs
+  document.querySelectorAll('.dash-subtab').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.dash-subtab').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.dash-subpanel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      const panel = document.getElementById('subpanel-' + btn.dataset.subtab);
+      if(panel) panel.classList.add('active');
+    });
   });
 
   // Add form actions
