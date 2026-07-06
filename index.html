@@ -790,7 +790,7 @@ tr.row-highlight td{
         <div class="dash-subtabs">
           <button class="dash-subtab active" data-subtab="overview">Overview</button>
           <button class="dash-subtab" data-subtab="unreserved">Unreserved <span class="dash-subtab-badge danger" id="badgeUnreserved">0</span></button>
-          <button class="dash-subtab" data-subtab="notfollowed">Not Followed Up <span class="dash-subtab-badge warning" id="badgeNotFollowed">0</span></button>
+
         </div>
 
         <!-- Sub-tab: Overview -->
@@ -815,10 +815,7 @@ tr.row-highlight td{
           <div id="unreservedList"></div>
         </div>
 
-        <!-- Sub-tab: Not Followed Up -->
-        <div class="dash-subpanel" id="subpanel-notfollowed">
-          <div id="notFollowedUpList"></div>
-        </div>
+
 
       </section>
 
@@ -838,7 +835,7 @@ tr.row-highlight td{
         <div class="toolbar">
           <input type="text" id="filterSearch" placeholder="🔍 Search name or username...">
           <select id="filterStatus"><option value="">All Status</option></select>
-          <select id="filterFollowUp"><option value="">All Follow Up</option></select>
+
           <select id="filterType"><option value="">All Type</option></select>
           <div class="date-filter-wrap">
             <label class="date-filter-label" for="filterDateFrom">📅 Trial Date</label>
@@ -862,7 +859,7 @@ tr.row-highlight td{
                 <th class="sortable" data-col="#">#<i class="sort-icon">↕</i></th>
                 <th>Actions</th>
                 <th class="sortable" data-col="status">Status<i class="sort-icon">↕</i></th>
-                <th class="sortable" data-col="followUp">Follow Up<i class="sort-icon">↕</i></th>
+
                 <th class="sortable" data-col="trialDate">Trial Schedule<i class="sort-icon">↕</i></th>
                 <th class="sortable" data-col="name">Name<i class="sort-icon">↕</i></th>
                 <th class="sortable" data-col="email">Email<i class="sort-icon">↕</i></th>
@@ -999,7 +996,7 @@ tr.row-highlight td{
           </p>
           <div class="column-ref">
             <span>Trial Class Date</span><span>Trial Class Time</span><span>Status</span>
-            <span>Follow Up</span><span>Type</span><span>Username</span><span>Name</span>
+            <span>Type</span><span>Name</span>
             <span>Email</span><span>Phone Number</span><span>Age</span><span>Domicile</span>
             <span>Occupation</span><span>Place of Occupation</span><span>Note</span>
           </div>
@@ -1114,7 +1111,7 @@ const STORAGE_KEY = 'lead_manager_ps_v2';
 const SETTINGS_KEY = 'lead_manager_settings_v1';
 
 const STATUS_OPTIONS   = ['Unreserved','Reserved','Attended','Half','Absent','Reschedule'];
-const FOLLOWUP_OPTIONS = ['Not Followed Up','Responded Well','No Response'];
+
 const TYPE_OPTIONS     = ['AMC','OKTB'];
 
 const STATUS_COLOR = {
@@ -1125,11 +1122,7 @@ const STATUS_COLOR = {
   'Absent':'gray',
   'Reschedule':'purple'
 };
-const FOLLOWUP_COLOR = {
-  'Not Followed Up':'red',
-  'Responded Well':'green',
-  'No Response':'gray'
-};
+
 const TYPE_COLOR = { 'AMC':'blue', 'OKTB':'purple' };
 
 const COLOR_HEX = {
@@ -1146,11 +1139,7 @@ const LEGACY_STATUS_MAP = {
   'Absent':'Absent',
   'Reschedule':'Reschedule'
 };
-const LEGACY_FOLLOWUP_MAP = {
-  'Belum Difollow Up':'Not Followed Up',
-  'Direspon Baik':'Responded Well',
-  'Tidak Direspon':'No Response'
-};
+
 
 const DAYS_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const DAYS_ID = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
@@ -1178,7 +1167,6 @@ const FORM_SECTIONS = [
     full:true,
     fields:[
       {key:'status',   label:'Status',    type:'select', options:STATUS_OPTIONS},
-      {key:'followUp', label:'Follow Up', type:'select', options:FOLLOWUP_OPTIONS},
       {key:'type',     label:'Type',      type:'select', options:TYPE_OPTIONS}
     ]
   },
@@ -1272,7 +1260,6 @@ function migrateLegacyData(arr){
   return arr.map(ps => {
     const p = {...ps};
     if(LEGACY_STATUS_MAP[p.status])    p.status   = LEGACY_STATUS_MAP[p.status];
-    if(LEGACY_FOLLOWUP_MAP[p.followUp]) p.followUp = LEGACY_FOLLOWUP_MAP[p.followUp];
     if(p.trialDate) p.trialDate = normalizeDateStr(p.trialDate);
     return p;
   });
@@ -1348,7 +1335,6 @@ function formatDateShort(dateStr){
 }
 function colorFor(kind,value){
   if(kind==='status')   return STATUS_COLOR[value]  ||'gray';
-  if(kind==='followUp') return FOLLOWUP_COLOR[value]||'gray';
   if(kind==='type')     return TYPE_COLOR[value]    ||'gray';
   return 'gray';
 }
@@ -1553,16 +1539,16 @@ function computeReminders(){
     }
 
     if(isSameDate(trialDate,dayPlus3)&&ps.status==='Reserved'){
-      reminders.push({type:'h3',tag:'Follow Up H-3',message:`Trial in 3 days: ${formatDateShort(ps.trialDate)}, ${ps.trialTime} — konfirmasi kehadiran`,ps});
+      reminders.push({type:'h3',tag:'H-3 Konfirmasi',message:`Trial in 3 days: ${formatDateShort(ps.trialDate)}, ${ps.trialTime} — konfirmasi kehadiran`,ps});
     }
     if(isSameDate(trialDate,tomorrow)&&ps.status==='Reserved'){
-      reminders.push({type:'h1',tag:'Follow Up H-1',message:`Trial besok: ${formatDateShort(ps.trialDate)}, ${ps.trialTime} — kirim reminder`,ps});
+      reminders.push({type:'h1',tag:'H-1 Reminder',message:`Trial besok: ${formatDateShort(ps.trialDate)}, ${ps.trialTime} — kirim reminder`,ps});
     }
     if(isSameDate(trialDate,today)){
       reminders.push({type:'today',tag:'Trial Class Today',message:`${formatDateShort(ps.trialDate)}, ${ps.trialTime}`,ps});
     }
     if(isSameDate(trialDate,yesterday)&&ps.status==='Attended'){
-      reminders.push({type:'h-plus1',tag:'Follow Up H+1',message:`Trial kemarin: ${formatDateShort(ps.trialDate)} — kirim thank you & minta testimoni`,ps});
+      reminders.push({type:'h-plus1',tag:'H+1 Thank You',message:`Trial kemarin: ${formatDateShort(ps.trialDate)} — kirim thank you & minta testimoni`,ps});
     }
   });
 
@@ -1758,7 +1744,6 @@ function renderStats(){
 }
 
 function renderCharts(){
-  renderNotFollowedUpList();
   renderUnreservedList();
   updateDashSubtabBadges();
 }
@@ -1766,86 +1751,14 @@ function renderCharts(){
 function updateDashSubtabBadges(){
   const today = getToday();
   const unreservedCount = psData.filter(p => p.status === 'Unreserved').length;
-  const notFollowedCount = psData.filter(p => p.followUp === 'Not Followed Up' && p.trialDate).length;
+
 
   const bu = document.getElementById('badgeUnreserved');
-  const bn = document.getElementById('badgeNotFollowed');
+
   if(bu) { bu.textContent = unreservedCount; bu.hidden = unreservedCount === 0; }
   if(bn) { bn.textContent = notFollowedCount; bn.hidden = notFollowedCount === 0; }
 }
 
-function renderNotFollowedUpList(){
-  const container = document.getElementById('notFollowedUpList');
-  if(!container) return;
-
-  // PS with followUp = 'Not Followed Up', sorted by trial date ascending
-  const list = psData
-    .filter(ps => ps.followUp === 'Not Followed Up')
-    .sort((a,b) => {
-      if(!a.trialDate && !b.trialDate) return 0;
-      if(!a.trialDate) return 1;
-      if(!b.trialDate) return -1;
-      return a.trialDate.localeCompare(b.trialDate);
-    });
-
-  if(list.length === 0){
-    container.innerHTML = '<div class="unreserved-empty" style="background:var(--success-bg);border-color:#BBF0CE;color:#14532D;">✅ All PS have been followed up!</div>';
-    return;
-  }
-
-  const today = getToday();
-  const rows = list.map((ps, i) => {
-    const wa = waLink(ps.phone);
-    const psId = escapeHTML(ps.id);
-
-    let trialCell = '-';
-    let urgency = '';
-    if(ps.trialDate){
-      const td = dateStrToDate(ps.trialDate);
-      const diffDays = Math.round((td - today) / (1000*60*60*24));
-      trialCell = `${formatDateShort(ps.trialDate)}${ps.trialTime ? `<span class="trial-time">${escapeHTML(ps.trialTime)}</span>` : ''}`;
-      if(diffDays < 0)       urgency = '<span class="badge badge-gray"   style="margin-left:6px;">Past</span>';
-      else if(diffDays === 0) urgency = '<span class="badge badge-red"    style="margin-left:6px;">Today!</span>';
-      else if(diffDays <= 2)  urgency = '<span class="badge badge-orange" style="margin-left:6px;">' + diffDays + 'd left</span>';
-      else                    urgency = '<span class="badge badge-blue"   style="margin-left:6px;">' + diffDays + 'd left</span>';
-    }
-
-    return `<tr>
-      <td style="color:var(--ink-soft);font-size:12px;">${i+1}</td>
-      <td><strong>${escapeHTML(ps.name||'-')}</strong></td>
-      <td><span class="badge badge-${colorFor('status', ps.status)}">${escapeHTML(ps.status||'-')}</span></td>
-      <td>${escapeHTML(ps.phone||'-')}</td>
-      <td><span class="badge badge-${colorFor('type', ps.type)}">${escapeHTML(ps.type||'-')}</span></td>
-      <td>
-        <div class="action-cell">
-          ${wa ? `<a class="btn btn-sm btn-wa" href="${wa}" target="_blank" rel="noopener">💬 WA</a>` : ''}
-          ${threadsLink(ps.threadsUrl)?`<a class="btn btn-sm" style="background:#000;color:#fff;" href="${threadsLink(ps.threadsUrl)}" target="_blank" rel="noopener">🧵 Threads</a>`:`<span class="btn btn-sm" style="opacity:0.3;cursor:default;background:#000;color:#fff;" title="Threads belum diisi">🧵 Threads</span>`}
-          <button class="btn-goto" onclick="openWaDropdown(this,'${psId}')">📋 Templates</button>
-          <button class="btn-goto" onclick="gotoPS('${psId}')">🔍 View</button>
-          <button class="btn-edit-inline" onclick="openEditModal('${psId}')">✏️ Edit</button>
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
-
-  container.innerHTML = `
-    <div class="table-wrapper">
-      <table class="unreserved-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name / Username</th>
-            <th>Trial Schedule</th>
-            <th>Status</th>
-            <th>Contact</th>
-            <th>Type</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
-}
 
 function renderUnreservedList(){
   const container=document.getElementById('unreservedList');
@@ -1931,7 +1844,7 @@ function renderUnreservedList(){
 function getFilteredData(){
   const search=document.getElementById('filterSearch').value.trim().toLowerCase();
   const status=document.getElementById('filterStatus').value;
-  const followUp=document.getElementById('filterFollowUp').value;
+
   const type=document.getElementById('filterType').value;
   const dateFrom=document.getElementById('filterDateFrom').value; // 'YYYY-MM-DD' or ''
   const dateTo=document.getElementById('filterDateTo').value;
@@ -1942,7 +1855,6 @@ function getFilteredData(){
       if(!hay.includes(search)) return false;
     }
     if(status&&ps.status!==status) return false;
-    if(followUp&&ps.followUp!==followUp) return false;
     if(type&&ps.type!==type) return false;
     if(dateFrom||dateTo){
       const d=ps.trialDate||'';
@@ -2044,7 +1956,7 @@ function renderTable(){
         <button class="btn-icon" title="Edit" data-action="edit" data-id="${ps.id}">✏️</button>
       </td>
       <td><span class="badge badge-${colorFor('status',ps.status)}">${escapeHTML(ps.status)}</span></td>
-      <td><span class="badge badge-${colorFor('followUp',ps.followUp)}">${escapeHTML(ps.followUp)}</span></td>
+
       <td>${trialInfo}</td>
       <td>
         ${escapeHTML(ps.name)}
@@ -2166,7 +2078,6 @@ function saveReschedule(){
   ps.trialDate=date;
   ps.trialTime=time;
   ps.status='Unreserved';
-  ps.followUp='Not Followed Up';
   saveData();
   syncIfEnabled();
   closeRescheduleModal();
@@ -2212,7 +2123,6 @@ function buildExportRows(){
     'Trial Class Date':ps.trialDate||'',
     'Trial Class Time':ps.trialTime||'',
     'Status':ps.status||'',
-    'Follow Up':ps.followUp||'',
     'Type':ps.type||'',
     'Name':ps.name||'',
     'Email':ps.email||'',
@@ -2260,7 +2170,6 @@ const COL_ALIASES = {
   'trial class date':'trialDate','trial date':'trialDate','tanggal trial':'trialDate',
   'trial class time':'trialTime','trial time':'trialTime','waktu trial':'trialTime',
   'status':'status',
-  'follow up':'followUp','followup':'followUp','follow-up':'followUp',
   'type':'type','tipe':'type',
   'threads url':'threadsUrl','threads':'threadsUrl','threads profile':'threadsUrl',
   'name':'name','nama':'name','full name':'name',
@@ -2381,10 +2290,10 @@ function renderImportPreview(newCount, skipCount){
 
   label.textContent = `${newCount} new record(s) will be imported${skipCount ? ', ' + skipCount + ' duplicate(s) will be skipped' : ''}.`;
 
-  const cols = ['name','username','trialDate','trialTime','status','followUp','type','phone'];
+  const cols = ['name','trialDate','trialTime','status','type','phone'];
   const colLabels = {
     name:'Name', username:'Username', trialDate:'Trial Date',
-    trialTime:'Time', status:'Status', followUp:'Follow Up',
+    trialTime:'Time', status:'Status',
     type:'Type', phone:'Contact'
   };
 
@@ -2410,7 +2319,7 @@ function confirmImport(){
   toAdd.forEach(ps => {
     // Migrate legacy status/followUp values just in case
     if(LEGACY_STATUS_MAP[ps.status])   ps.status   = LEGACY_STATUS_MAP[ps.status];
-    if(LEGACY_FOLLOWUP_MAP[ps.followUp]) ps.followUp = LEGACY_FOLLOWUP_MAP[ps.followUp];
+
     ps.id = generateId();
     psData.push(ps);
   });
@@ -2620,8 +2529,6 @@ function updateTopbarDate(){
 function populateFilterOptions(){
   const statusSel=document.getElementById('filterStatus');
   STATUS_OPTIONS.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; statusSel.appendChild(o); });
-  const fuSel=document.getElementById('filterFollowUp');
-  FOLLOWUP_OPTIONS.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; fuSel.appendChild(o); });
   const typeSel=document.getElementById('filterType');
   TYPE_OPTIONS.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; typeSel.appendChild(o); });
 }
@@ -3217,7 +3124,6 @@ function gotoPS(psId){
   // 2. Clear all filters so the row is visible
   document.getElementById('filterSearch').value='';
   document.getElementById('filterStatus').value='';
-  document.getElementById('filterFollowUp').value='';
   document.getElementById('filterType').value='';
   document.getElementById('filterDateFrom').value='';
   document.getElementById('filterDateTo').value='';
@@ -3281,7 +3187,7 @@ function init(){
 
   // Filters
   populateFilterOptions();
-  ['filterSearch','filterStatus','filterFollowUp','filterType','filterDateFrom','filterDateTo'].forEach(id=>{
+  ['filterSearch','filterStatus','filterType','filterDateFrom','filterDateTo'].forEach(id=>{
     document.getElementById(id).addEventListener('input',renderTable);
     document.getElementById(id).addEventListener('change',renderTable);
   });
@@ -3293,8 +3199,7 @@ function init(){
   document.getElementById('resetFilterBtn').addEventListener('click',()=>{
     document.getElementById('filterSearch').value='';
     document.getElementById('filterStatus').value='';
-    document.getElementById('filterFollowUp').value='';
-    document.getElementById('filterType').value='';
+      document.getElementById('filterType').value='';
     document.getElementById('filterDateFrom').value='';
     document.getElementById('filterDateTo').value='';
     sortState={col:null,dir:null};
