@@ -1756,7 +1756,6 @@ function updateDashSubtabBadges(){
   const bu = document.getElementById('badgeUnreserved');
 
   if(bu) { bu.textContent = unreservedCount; bu.hidden = unreservedCount === 0; }
-  if(bn) { bn.textContent = notFollowedCount; bn.hidden = notFollowedCount === 0; }
 }
 
 
@@ -2469,37 +2468,37 @@ async function autoPullOnLoad(){
   const url = getSyncUrl();
   if(!url || !settings.autoSync) return;
 
-  // Tampilkan banner kecil di topbar
   const banner = document.getElementById('syncLoadingBanner');
   if(banner) banner.hidden = false;
 
+  // Pull PS data dan templates secara paralel — tidak saling bergantung
   try{
-    const res = await fetch(url + '?action=read', { headers:{'Content-Type':'text/plain'} });
-    const json = await res.json();
-    if(!json.ok || !json.data || !json.data.length){
-      if(banner) banner.hidden = true;
-      return;
-    }
-    const before = psData.length;
-    psData = mergeFromSheets(json.data);
-    saveData();
-    settings.lastSync = Date.now();
-    saveSettings();
-    updateSyncUI();
-    renderAll();
+    const [psRes, tplPulled] = await Promise.all([
+      fetch(url + '?action=read', { headers:{'Content-Type':'text/plain'} })
+        .then(r => r.json())
+        .catch(() => null),
+      pullTemplatesFromSheets()
+    ]);
 
-    const added = psData.length - before;
-    // Pull templates juga
-    const templatePulled = await pullTemplatesFromSheets();
-    if(templatePulled) renderWaTemplatesSettings();
+    // Update templates jika berhasil
+    if(tplPulled) renderWaTemplatesSettings();
 
-    if(added > 0){
-      showToast('Auto-sync: ' + added + ' data baru dari Sheets ditambahkan!');
-    } else {
-      showToast('Auto-sync: data sudah up to date.');
+    // Update PS data jika berhasil
+    if(psRes && psRes.ok && psRes.data && psRes.data.length){
+      const before = psData.length;
+      psData = mergeFromSheets(psRes.data);
+      saveData();
+      settings.lastSync = Date.now();
+      saveSettings();
+      updateSyncUI();
+      renderAll();
+      const added = psData.length - before;
+      if(added > 0){
+        showToast('Auto-sync: ' + added + ' data baru dari Sheets!');
+      }
     }
   }catch(e){
-    // Gagal konek → diam saja, pakai data lokal
+    // Silent fail — pakai data lokal
   } finally {
     if(banner) banner.hidden = true;
   }
@@ -2733,13 +2732,12 @@ function loadWaTemplates(){
   try{
     const raw = JSON.parse(localStorage.getItem(WA_TEMPLATES_KEY));
     if(raw && raw.length){
-      // Merge: keep user edits, add any new defaults not yet in storage
-      waTemplates = WA_TEMPLATE_DEFAULTS.map(def => {
-        const saved = raw.find(t => t.id === def.id);
-        return saved ? {...def, body: saved.body, label: saved.label} : {...def};
-      });
+      // Pakai SEMUA template dari localStorage — termasuk yang user tambah sendiri
+      waTemplates = raw;
     } else {
+      // localStorage kosong → pakai defaults
       waTemplates = WA_TEMPLATE_DEFAULTS.map(t => ({...t}));
+      localStorage.setItem(WA_TEMPLATES_KEY, JSON.stringify(waTemplates));
     }
   }catch(e){
     waTemplates = WA_TEMPLATE_DEFAULTS.map(t => ({...t}));
@@ -2747,9 +2745,14 @@ function loadWaTemplates(){
 }
 
 function saveWaTemplates(){
+  // Simpan ke localStorage dulu — ini yang paling penting
   localStorage.setItem(WA_TEMPLATES_KEY, JSON.stringify(waTemplates));
-  // Push ke Sheets juga (silent — tidak ganggu UI)
-  pushTemplatesToSheets();
+  // Push ke Sheets (silent, async — tidak ganggu UI)
+  // Delay sedikit supaya tidak spam saat edit cepat
+  if(saveWaTemplates._timer) clearTimeout(saveWaTemplates._timer);
+  saveWaTemplates._timer = setTimeout(function(){
+    pushTemplatesToSheets(false);
+  }, 800);
 }
 
 async function pushTemplatesToSheets(manual){
