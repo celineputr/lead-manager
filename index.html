@@ -612,6 +612,25 @@ tr.row-highlight td{
 .startup-name{font-size:13px;font-weight:700;color:var(--ink);}
 .startup-msg{font-size:12px;color:var(--ink-soft);margin-top:2px;}
 
+/* ---------- Daily Checklist ---------- */
+.daily-checklist-card{}
+.checklist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.checklist-title{font-size:15px;font-weight:800;color:var(--ink);}
+.checklist-subtitle{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+.checklist-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--bg);margin-bottom:6px;transition:background .15s;}
+.checklist-item.done{background:#F0FDF4;border-color:#86EFAC;}
+.checklist-item.done .checklist-label{text-decoration:line-through;color:var(--ink-soft);}
+.checklist-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;background:transparent;}
+.checklist-check.checked{background:var(--success);border-color:var(--success);color:#fff;}
+.checklist-label{flex:1;font-size:13px;color:var(--ink);background:none;border:none;outline:none;font-family:inherit;cursor:text;min-width:0;}
+.checklist-label:focus{border-bottom:1px solid var(--border);}
+.checklist-time{font-size:12px;color:var(--ink-soft);background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:3px 7px;width:80px;font-family:inherit;text-align:center;}
+.checklist-duration{font-size:12px;color:var(--ink-soft);background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:3px 7px;width:70px;font-family:inherit;text-align:center;}
+.checklist-del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:14px;opacity:0;transition:opacity .15s;padding:2px 6px;}
+.checklist-item:hover .checklist-del{opacity:1;}
+.checklist-del:hover{color:var(--danger);}
+.checklist-empty{text-align:center;padding:20px;color:var(--ink-soft);font-size:13px;}
+
 /* ---------- Dashboard Sub-tabs ---------- */
 .dash-subtabs{display:flex;gap:0;border-bottom:1.5px solid var(--border);margin-bottom:16px;}
 .dash-subtab{background:none;border:none;border-bottom:2.5px solid transparent;padding:9px 16px;font-size:13px;font-weight:500;color:var(--ink-soft);cursor:pointer;margin-bottom:-1.5px;display:flex;align-items:center;gap:6px;font-family:inherit;}
@@ -711,6 +730,10 @@ tr.row-highlight td{
         <span class="nav-icon">📊</span>
         <span class="nav-label">Dashboard</span>
         <span class="nav-badge" id="reminderBadge" hidden>0</span>
+      </button>
+      <button class="nav-item" data-tab="checklist">
+        <span class="nav-icon">✅</span>
+        <span class="nav-label">Checklist</span>
       </button>
       <button class="nav-item" data-tab="tambah">
         <span class="nav-icon">➕</span>
@@ -817,6 +840,20 @@ tr.row-highlight td{
 
 
 
+      </section>
+
+      <!-- ===== TAB: CHECKLIST ===== -->
+      <section id="tab-checklist" class="tab-panel">
+        <div class="card daily-checklist-card">
+          <div class="checklist-header">
+            <div>
+              <div class="checklist-title">📋 Daily Checklist</div>
+              <div class="checklist-subtitle" id="checklistProgress">0 / 0 selesai</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="addChecklistItem()">＋ Tambah Task</button>
+          </div>
+          <div id="checklistItems"></div>
+        </div>
       </section>
 
       <!-- ===== TAB: ADD PS ===== -->
@@ -1147,6 +1184,7 @@ const MONTHS_SHORT_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','
 
 const TAB_INFO = {
   dashboard:{title:'Dashboard', subtitle:'Performance summary & today\'s reminders'},
+  checklist:{title:'Daily Checklist', subtitle:'Task harian — reset otomatis setiap hari'},
   tambah:{title:'Add PS', subtitle:'Record new Potential Student data'},
   data:{title:'PS Data', subtitle:'Manage all potential student records'},
   importexport:{title:'Import & Export', subtitle:'Import data from Excel/CSV or export as backup'},
@@ -1357,6 +1395,163 @@ function waLink(phone){
   const num = digits.startsWith('0') ? digits.slice(1) : digits;
   return `https://wa.me/62${num}`;
 }
+const CHECKLIST_ITEMS_KEY = 'lead_manager_checklist_items_v1';
+const CHECKLIST_CHECKS_KEY = 'lead_manager_checklist_checks_v1';
+
+const CHECKLIST_DEFAULTS = [
+  { id:'cl_default_1', label:'Upload / schedule Threads content',       time:'', duration:'' },
+  { id:'cl_default_2', label:'Reply Threads DMs',                       time:'', duration:'' },
+  { id:'cl_default_3', label:'Send confirmation booking (war today)',    time:'', duration:'' },
+  { id:'cl_default_4', label:'Send reminders D-1 & oncam',              time:'', duration:'' },
+  { id:'cl_default_5', label:'Send thank you H+1',                      time:'', duration:'' },
+  { id:'cl_default_6', label:'Update Lead Manager / CRM',               time:'', duration:'' },
+];
+
+let checklistItems = []; // [{id, label, time, duration}]
+let checklistChecks = {}; // {id: 'YYYY-MM-DD'} — tanggal terakhir dicentang
+
+function getTodayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function loadChecklistItems(){
+  try{
+    const stored = JSON.parse(localStorage.getItem(CHECKLIST_ITEMS_KEY));
+    checklistChecks = JSON.parse(localStorage.getItem(CHECKLIST_CHECKS_KEY)) || {};
+    if(stored && stored.length){
+      checklistItems = stored;
+    } else {
+      // Pertama kali buka → pakai defaults
+      checklistItems = CHECKLIST_DEFAULTS.map(d => ({...d}));
+      localStorage.setItem(CHECKLIST_ITEMS_KEY, JSON.stringify(checklistItems));
+    }
+  }catch(e){
+    checklistItems = CHECKLIST_DEFAULTS.map(d => ({...d}));
+    checklistChecks = {};
+  }
+}
+
+function saveChecklistItems(){
+  localStorage.setItem(CHECKLIST_ITEMS_KEY, JSON.stringify(checklistItems));
+  localStorage.setItem(CHECKLIST_CHECKS_KEY, JSON.stringify(checklistChecks));
+}
+
+function isCheckedToday(id){
+  return checklistChecks[id] === getTodayStr();
+}
+
+function toggleChecklistItem(id){
+  if(isCheckedToday(id)){
+    delete checklistChecks[id];
+  } else {
+    checklistChecks[id] = getTodayStr();
+  }
+  saveChecklistItems();
+  renderChecklist();
+}
+
+function addChecklistItem(){
+  const id = 'cl_' + Date.now().toString(36);
+  checklistItems.push({ id, label:'Task baru', time:'', duration:'' });
+  saveChecklistItems();
+  renderChecklist();
+  // Focus label yang baru
+  requestAnimationFrame(()=>{
+    const items = document.querySelectorAll('.checklist-label');
+    if(items.length){ items[items.length-1].focus(); items[items.length-1].select(); }
+  });
+}
+
+function deleteChecklistItem(id){
+  checklistItems = checklistItems.filter(i => i.id !== id);
+  delete checklistChecks[id];
+  saveChecklistItems();
+  renderChecklist();
+}
+
+function updateChecklistField(id, field, value){
+  const item = checklistItems.find(i => i.id === id);
+  if(item){ item[field] = value; saveChecklistItems(); }
+  // Update progress tanpa re-render penuh
+  updateChecklistProgress();
+}
+
+function updateChecklistProgress(){
+  const today = getTodayStr();
+  const done = checklistItems.filter(i => checklistChecks[i.id] === today).length;
+  const total = checklistItems.length;
+  const el = document.getElementById('checklistProgress');
+  if(el) el.textContent = total === 0 ? 'Belum ada task' : done + ' / ' + total + ' selesai';
+}
+
+function renderChecklist(){
+  const container = document.getElementById('checklistItems');
+  if(!container) return;
+
+  if(!checklistItems.length){
+    container.innerHTML = '<div class="checklist-empty">Belum ada task. Klik ＋ Tambah untuk mulai.</div>';
+    updateChecklistProgress();
+    return;
+  }
+
+  const today = getTodayStr();
+  container.innerHTML = '';
+  checklistItems.forEach(item => {
+    const checked = checklistChecks[item.id] === today;
+    const row = document.createElement('div');
+    row.className = 'checklist-item' + (checked ? ' done' : '');
+
+    // Check button
+    const check = document.createElement('button');
+    check.className = 'checklist-check' + (checked ? ' checked' : '');
+    check.innerHTML = checked ? '✓' : '';
+    check.title = checked ? 'Batal' : 'Selesai';
+    check.addEventListener('click', () => toggleChecklistItem(item.id));
+    row.appendChild(check);
+
+    // Label
+    const label = document.createElement('input');
+    label.type = 'text';
+    label.className = 'checklist-label';
+    label.value = item.label || '';
+    label.placeholder = 'Nama task...';
+    label.addEventListener('change', () => updateChecklistField(item.id, 'label', label.value));
+    row.appendChild(label);
+
+    // Time
+    const time = document.createElement('input');
+    time.type = 'time';
+    time.className = 'checklist-time';
+    time.value = item.time || '';
+    time.title = 'Jam mulai';
+    time.addEventListener('change', () => updateChecklistField(item.id, 'time', time.value));
+    row.appendChild(time);
+
+    // Duration
+    const dur = document.createElement('input');
+    dur.type = 'text';
+    dur.className = 'checklist-duration';
+    dur.value = item.duration || '';
+    dur.placeholder = '30 mnt';
+    dur.title = 'Durasi';
+    dur.addEventListener('change', () => updateChecklistField(item.id, 'duration', dur.value));
+    row.appendChild(dur);
+
+    // Delete
+    const del = document.createElement('button');
+    del.className = 'checklist-del';
+    del.textContent = '🗑';
+    del.title = 'Hapus';
+    del.addEventListener('click', () => deleteChecklistItem(item.id));
+    row.appendChild(del);
+
+    container.appendChild(row);
+  });
+
+  updateChecklistProgress();
+}
+
 const AMC_AVAILABILITY_SLOTS = [
   'Weekday 13.30 – 15.30 WIB',
   'Weekday 19.00 – 21.00 WIB',
@@ -1574,6 +1769,9 @@ function renderAll(){
   if(uncheckedCount===0){ badge.hidden=true; }
   else{ badge.hidden=false; badge.textContent=uncheckedCount; }
 
+  if(isTabActive('checklist')){
+    renderChecklist();
+  }
   if(isTabActive('dashboard')){
     renderMonthPickerLabel();
     renderTargetBanner();
@@ -3326,6 +3524,7 @@ function init(){
   document.getElementById('addNoteBtn').addEventListener('click', addNote);
   document.getElementById('notesSearch').addEventListener('input', filterNotes);
 
+  loadChecklistItems();
   loadCheckedReminders();
   updateTopbarDate();
   renderAll();
